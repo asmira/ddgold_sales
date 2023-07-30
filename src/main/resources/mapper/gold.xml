@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.GoldDao">
+	<select id="selectGoldMngList" parameterType="com.ddgold.vo.SalesParamVO" resultType="com.ddgold.vo.GoldVO">
+		select 
+			gold_seq,
+			gold_dt,
+			k10,
+			k14,
+			k18,
+			k24,
+			diamond,
+			transfer,
+			cash,
+			goods,
+			gold
+		from gold_mng m
+		<where>
+			1=1
+			<if test="month != null and month != ''">
+				and m.gold_dt like concat(#{year}, '-', #{month}, '%')
+			</if>
+ 			<if test="dt != null and dt != ''">
+				and m.gold_dt = #{dt}
+			</if> 
+		</where>
+		<choose>
+			<when test="ordDirection == 'desc'">
+			order by m.gold_dt desc, m.gold_seq desc
+			</when>
+			<otherwise>
+			order by m.gold_dt, m.gold_seq
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selectLastGoldMng" resultType="com.ddgold.vo.GoldVO">
+		select 
+			gold_seq,
+			gold_dt,
+			k10,
+			k14,
+			k18,
+			k24,
+			diamond,
+			transfer,
+			cash,
+			goods,
+			gold
+		from gold_mng
+		order by gold_dt desc, gold_seq desc
+		limit 1 
+	</select>
+
+	<insert id="insertGoldMng" parameterType="com.ddgold.vo.GoldVO">
+		insert into gold_mng (gold_dt,
+			k10,
+			k14,
+			k18,
+			k24,
+			diamond,
+			transfer,
+			cash,
+			goods,
+			gold) values 
+		(	
+			#{goldDt},
+			#{k10},
+			#{k14},
+			#{k18},
+			#{k24},
+			#{diamond},
+			#{transfer},
+			#{cash},
+			#{goods},
+			#{gold}
+		)	
+	</insert>
+	
+	<update id="updateGoldMng" parameterType="com.ddgold.vo.GoldVO">
+		update gold_mng set 
+			goldDt = #{goldDt},
+			k10 = #{k10},
+			k14 = #{k14},
+			k18 = #{k18},
+			k24 = #{k24},
+			diamond= #{diamond},
+			transfer = #{transfer},
+			cash = #{cash},
+			goods = #{goods},
+			gold = #{gold}
+		where gold_seq = #{gold_seq}
+	</update>
+	
+	<delete id="deleteGoldMng" parameterType="com.ddgold.vo.GoldVO">
+		delete from gold_mng where gold_seq = #{goldSeq}
+	</delete>
+</mapper>

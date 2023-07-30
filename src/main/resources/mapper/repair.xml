@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.RepairDao">
+    <select id="selectRepairList" parameterType="com.ddgold.vo.SalesParamVO">
+        SELECT 
+            repair_seq,
+            repair_mobile,
+            repair_name,
+            prd_type,
+            (select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
+            karatage,
+            (select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+            repair_desc,
+            repair_price,
+            payment_card_dtl,
+            payment_transfer_dtl,
+            payment_cash_dtl,
+            repair_date,
+            receipt_date,
+            finish_date
+        FROM repair_mng m
+        <where>
+			1=1
+			<if test="month != null and month != ''">
+				and m.repair_date like concat(#{year}, '-', #{month}, '%')
+			</if>
+ 			<if test="dt != null and dt != ''">
+				and m.repair_date = #{dt}
+			</if> 
+            <choose>
+                <when test="status == 'notReciept'">
+                    and receipt_date is null
+                </when>
+                <when test="status == 'notFinished'">
+                    and finish_date is null and receipt_date is not null
+                </when>
+            </choose>
+		</where>
+		<choose>
+			<when test="ordDirection == 'desc'">
+			order by m.repair_date desc, m.repair_seq desc
+			</when>
+			<otherwise>
+			order by m.repair_date, m.repair_seq
+			</otherwise>
+		</choose>
+    </select>
+
+    <select id="selectRepair" parameterType="integer">
+        SELECT 
+            repair_seq,
+            repair_mobile,
+            repair_name,
+            prd_type,
+            (select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
+            karatage,
+            (select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+            repair_desc,
+            repair_price,
+            payment_card_dtl,
+            payment_transfer_dtl,
+            payment_cash_dtl,
+            repair_date,
+            receipt_date,
+            finish_date
+        FROM repair_mng
+        where repair_seq = #{repairSeq}
+    </select>
+
+    <insert id="insertRepair" parameterType="com.ddgold.vo.RepairVO">
+        insert into repair_mng (
+            repair_seq,
+            repair_mobile,
+            repair_name,
+            prd_type,
+            karatage,
+            repair_desc,
+            repair_price,
+            payment_card_dtl,
+            payment_transfer_dtl,
+            payment_cash_dtl,
+            repair_date
+        ) values (
+            #{repairSeq},
+            #{repairMobile},
+            #{repairName},
+            #{prdType},
+            #{karatage},
+            #{repairDesc},
+            #{repairPrice},
+            #{paymentCardDtl},
+            #{paymentTransferDtl},
+            #{paymentCashDtl},
+            #{repairDate}
+        )
+    </insert>
+
+    <update id="updateRepair" parameterType="com.ddgold.vo.RepairVO">
+    </update>
+
+    <delete id="deleteRepair" parameterType="integer">
+        delete from repair_mng where repair_seq = #{repairSeq}
+    </delete>
+</mapper>

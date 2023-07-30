@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.CashDao">
+	<select id="selectCashOnHands" parameterType="com.ddgold.vo.SalesParamVO" resultType="com.ddgold.vo.CashOnHandVO">
+		select 
+			cash_seq, cash_type, cash_dt, cash_income, cash_expense
+		from cash_on_hand m
+		<where>
+			1=1
+			<if test="month != null and month != ''">
+				and m.cash_dt like concat(#{year}, '-', #{month}, '%')
+			</if>
+ 			<if test="dt != null and dt != ''">
+				and m.cash_dt = #{dt}
+			</if> 
+		</where>
+		<choose>
+			<when test="ordDirection == 'desc'">
+			order by m.cash_dt desc, m.cash_seq desc
+			</when>
+			<otherwise>
+			order by m.cash_dt, m.cash_seq
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selectLastCashOnHand" resultType="com.ddgold.vo.CashOnHandVO">
+		select 
+			cash_seq, cash_type, cash_dt, cash_income, cash_expense
+		from cash_on_hand
+		order by cash_dt desc, cash_seq desc
+		limit 1 
+	</select>
+
+	<insert id="insertLastCashOnHand">
+		insert into cash_on_hand (cash_type, cash_dt, cash_income, cash_expense)
+		select 
+			'전일시재' as cash_type,
+			date_add((select max(cash_dt) from cash_on_hand),interval 1 day) as cash_dt,
+			sum(cash_income)-sum(cash_expense) as cash_income,
+			0 as cash_expense
+		from cash_on_hand 
+		where cash_dt = (select max(cash_dt) from cash_on_hand)
+	</insert>
+
+	<insert id="insertCashOnHand" parameterType="com.ddgold.vo.CashOnHandVO">
+		insert into cash_on_hand (cash_type, cash_dt, cash_income, cash_expense) values 
+		(#{cashType}, #{cashDt}, #{cashIncome}, #{cashExpense})	
+	</insert>
+	
+	<update id="updateCashOnHand" parameterType="com.ddgold.vo.CashOnHandVO">
+		update sales_mst 
+		<set>
+			<if test="salesDt != null and salesDt != ''">
+				cash_dt = #{cashDt}
+			</if>
+			<if test="prdPrice != null and prdPrice != ''">
+				cash_type = #{cashType}
+			</if>
+			<if test="salePrice != null and salePrice != ''">
+				cash_income = #{cashIncome}
+			</if>
+			<if test="description != null and description != ''">
+				cash_expense = #{cashExpense}
+			</if>
+		</set>
+		where 
+			sales_dtl_seq=#{salesDtlSeq}
+	</update>
+	
+	<delete id="deleteCashOnHand" parameterType="com.ddgold.vo.CashOnHandVO">
+		delete from cash_on_hand where cash_seq = #{cashSeq}
+	</delete>
+</mapper>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.StatisticsDao">
+	<select id="selectDailyKaratStatistics" parameterType="com.ddgold.vo.SalesParamVO" resultType="com.ddgold.vo.StatisticsVO">
+		select 
+			sales_dt as colValue,
+			sum(
+				case when karatage = 1 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) as k14,
+			sum(
+				case when karatage = 2 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) k18,
+			sum(
+				case when karatage = 3 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) gold,
+			sum(
+				case when karatage = 4 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) silver,
+			sum(case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end) total
+		from (
+			select 
+				m.sales_seq,
+				case 
+					when d.sale_price > 0 
+					then d.sales_dtl_seq 
+					else 0 
+					end as sales_dtl,
+				m.sales_dt,
+				m.prd_price,
+				m.sale_price,
+				d.karatage,
+				d.prd_price as dtl_prd_price,
+				d.sale_price as dtl_sale_price
+			from sales_mst m
+			left outer join sales_dtl d on m.sales_seq = d.sales_seq
+			<where>
+				d.sales_type != 6
+				<choose>
+					<when test="dt != null and dt != ''">
+						and sales_dt = #{dt}
+					</when>
+					<when test="month != null and month != ''">
+						and m.sales_dt like concat(#{year}, '-', #{month}, '%')
+					</when>	
+					<otherwise>
+						<if test="startDate != null and startDate != ''">
+							and sales_dt >= #{startDate}
+						</if>
+						<if test="endDate != null and endDate != ''">
+							and sales_dt &lt;= #{endDate}
+						</if>	
+					</otherwise>
+				</choose>
+			</where>
+			group by sales_seq, sales_dt
+		) a
+		group by sales_dt
+	</select>
+
+	<select id="selectWeekdayKaratStatistics" parameterType="com.ddgold.vo.SalesParamVO" resultType="com.ddgold.vo.StatisticsVO">
+		select 
+		wd as colValue,
+		karatage,
+		sum(
+			case when karatage = 1 then 
+			case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+			else 0 end 
+		) as k14,
+		sum(
+			case when karatage = 2 then 
+			case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+			else 0 end 
+		) k18,
+		sum(
+			case when karatage = 3 then 
+			case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+			else 0 end 
+		) gold,
+		sum(
+			case when karatage = 4 then 
+			case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+			else 0 end 
+		) silver,
+		sum(case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end) total,
+		sum(case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end)/count(distinct sales_dt) as avg
+	from (
+		select 
+			m.sales_seq,
+			case when d.sale_price > 0 then d.sales_dtl_seq else 0 end as sales_dtl,
+			m.sales_dt,
+			weekday(m.sales_dt) as wd,
+			m.prd_price,
+			m.sale_price,
+			d.karatage,
+			d.prd_price as dtl_prd_price,
+			d.sale_price as dtl_sale_price
+		from sales_mst m
+		left outer join sales_dtl d on m.sales_seq = d.sales_seq
+		where 
+			d.sales_type != 6
+			and m.sales_dt like concat(#{year}, '-', #{month}, '%')
+		group by sales_seq, sales_dt
+	) a
+	group by wd
+	</select>
+
+	<select id="selectMonthlyKaratStatistics" parameterType="com.ddgold.vo.SalesParamVO" resultType="com.ddgold.vo.StatisticsVO">
+		select 
+			m as colValue,
+			karatage,
+			sum(
+				case when karatage = 1 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) as k14,
+			sum(
+				case when karatage = 2 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) k18,
+			sum(
+				case when karatage = 3 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) gold,
+			sum(
+				case when karatage = 4 then 
+				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
+				else 0 end 
+			) silver,
+			sum(case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end) total,
+			sum(case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end)/count(distinct sales_dt) as avg
+		from (
+			select 
+				m.sales_seq,
+				case when d.sale_price > 0 then d.sales_dtl_seq else 0 end as sales_dtl,
+				m.sales_dt,
+				date_format(m.sales_dt, '%Y-%m') m,
+				m.prd_price,
+				m.sale_price,
+				d.karatage,
+				d.prd_price as dtl_prd_price,
+				d.sale_price as dtl_sale_price
+			from sales_mst m
+			left outer join sales_dtl d on m.sales_seq = d.sales_seq
+			where d.sales_type != 6
+				and m.sales_dt like concat(#{year}, '%')
+			group by sales_seq, sales_dt
+		) a
+		group by m
+	</select>
+	
+	<select id="selectDailyPaymentStatistics" parameterType="com.ddgold.vo.SalesParamVO">
+		select 
+			sales_dt as colValue,
+			sum(payment_card_dtl) as payment_card_dtl,
+			sum(payment_transfer_dtl) as payment_transfer_dtl,
+			sum(payment_cash_dtl) as payment_cash_dtl,
+			sum(payment_gold_dtl) as payment_gold_dtl,
+			sum(payment_goods_dtl) as payment_goods_dtl,
+			sum(payment_card_dtl+payment_transfer_dtl+payment_cash_dtl+payment_gold_dtl+payment_goods_dtl) as total
+		from sales_mst
+		<where>
+			<choose>
+				<when test="dt != null and dt != ''">
+					sales_dt = #{dt}
+				</when>
+				<when test="month != null and month != ''">
+					sales_dt like concat(#{year}, '-', #{month}, '%')
+				</when>	
+				<otherwise>
+					<if test="startDate != null and startDate != ''">
+						and sales_dt >= #{startDate}
+					</if>
+					<if test="endDate != null and endDate != ''">
+						and sales_dt &lt;= #{endDate}
+					</if>	
+				</otherwise>
+			</choose>
+		</where>
+		group by sales_dt
+	</select>
+	
+	<select id="selectMonthlyPaymentStatistics" parameterType="com.ddgold.vo.SalesParamVO">
+		select 
+			date_format(sales_dt, '%Y-%m') as colValue,
+			sum(payment_card_dtl) as payment_card_dtl,
+			sum(payment_transfer_dtl) as payment_transfer_dtl,
+			sum(payment_cash_dtl) as payment_cash_dtl,
+			sum(payment_gold_dtl) as payment_gold_dtl,
+			sum(payment_goods_dtl) as payment_goods_dtl,
+			sum(payment_card_dtl+payment_transfer_dtl+payment_cash_dtl+payment_gold_dtl+payment_goods_dtl) as total
+		from sales_mst
+		group by date_format(sales_dt, '%Y-%m')
+	</select>
+	<select id="selectWeekdayPaymentStatistics" parameterType="com.ddgold.vo.SalesParamVO">
+		select 
+			weekday(sales_dt) as colValue,
+			sum(payment_card_dtl) as payment_card_dtl,
+			sum(payment_transfer_dtl) as payment_transfer_dtl,
+			sum(payment_cash_dtl) as payment_cash_dtl,
+			sum(payment_gold_dtl) as payment_gold_dtl,
+			sum(payment_goods_dtl) as payment_goods_dtl,
+			sum(payment_card_dtl+payment_transfer_dtl+payment_cash_dtl+payment_gold_dtl+payment_goods_dtl) as total
+		from sales_mst
+		group by weekday(sales_dt)
+	</select>
+</mapper>

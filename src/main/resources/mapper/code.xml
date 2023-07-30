@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.CodeDao">
+	<select id="selectCodes" parameterType="com.ddgold.vo.CodeVO">
+		select
+			code_seq,
+			code_grp,
+			code_val,
+			code_desc
+		from code_dtl
+		<where>
+			<if test="codeGrp != null and codeGrp !=''">
+			code_grp = #{codeGrp}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectCode" parameterType="com.ddgold.vo.CodeVO">
+		select
+			code_seq,
+			code_grp,
+			code_val,
+			code_desc
+		from code_dtl
+		<where>
+			code_grp = #{codeGrp}
+			and code_val = #{codeVal}
+		</where>
+	</select>
+	
+	<insert id="insertCode" parameterType="com.ddgold.vo.CodeVO">
+		insert into code_dtl(code_grp, code_val, code_desc) values
+		(#{codeGrp},#{codeVal},#{codeDesc}) 
+	</insert>
+	
+	<update id="updateCode" parameterType="com.ddgold.vo.CodeVO">
+		update code_dtl set
+			code_desc = #{code_desc}
+		where 
+			code_grp = #{codeGrp}
+			and code_val = #{codeVal}
+	</update>
+	
+	<delete id="deleteCode" parameterType="com.ddgold.vo.CodeVO">
+		delete from code_dtl
+		where 
+			code_grp =#{codeGrp}
+			<if test="codeVal != null and codeVal !=''">
+			code_val = #{codeVal}
+			</if>
+	</delete>
+</mapper>

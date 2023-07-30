@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ddgold.dao.SalesDao">
+	<resultMap id="salesMap" type="com.ddgold.vo.SalesVO">
+	    <id property="salesSeq" column="SALES_SEQ"/>
+	    <result property="salesDt" column="SALES_DT"/>
+	    <result property="prdPrice" column="PRD_PRICE"/>
+	    <result property="salePrice" column="SALE_PRICE"/>
+	    <result property="paymentCardDtl" column="PAYMENT_CARD_DTL"/>
+	    <result property="paymentTransferDtl" column="PAYMENT_TRANSFER_DTL"/>
+	    <result property="paymentCashDtl" column="PAYMENT_CASH_DTL"/>
+	    <result property="paymentGoldDtl" column="PAYMENT_GOLD_DTL"/>
+	    <result property="paymentGoodsDtl" column="PAYMENT_GOODS_DTL"/>
+	    <result property="description" column="DESCRIPTION"/>
+	    <association property="remain" column="salesSeq" javaType="com.ddgold.vo.RemainVO">
+	    	<id property="remainSeq" column="remain_seq"/>
+	    	<result property="salesSeq" column="sales_seq"/>
+	    	<result property="remainAmt" column="remain_amt"/>
+	    	<result property="remainSalesSeq" column="remain_sales_seq"/>
+	    	<result property="remainSalesDt" column="remain_sales_dt"/>
+	    	<result property="remainPaymentAmt" column="remain_payment_amt"/>
+	    	<result property="description" column="description"/>
+	    </association>
+	    <collection property="salesDtlList" ofType="com.ddgold.vo.SalesDtlVO">
+	    	<id property="salesDtlSeq" column="SALES_DTL_SEQ"/>
+			<result property="salesSeq"	column="SALES_SEQ"/>
+			<result property="salesType"	column="SALES_TYPE"/>
+			<result property="salesTypeStr"	column="SALES_TYPE_STR"/>
+			<result property="prdType"	column="PRD_TYPE"/>
+			<result property="prdTypeStr"	column="PRD_TYPE_STR"/>
+			<result property="karatage"	column="KARATAGE"/>
+			<result property="karatageStr"	column="KARATAGE_STR"/>
+			<result property="weight"	column="WEIGHT"/>
+			<result property="dtlPrdPrice"	column="DTL_PRD_PRICE"/>
+			<result property="dtlSalePrice"	column="DTL_SALE_PRICE"/>
+	    </collection>
+	</resultMap>
+	
+	<select id="selectRemainSalesList" parameterType="com.ddgold.vo.SalesParamVO">
+		select r.sales_seq, r.sales_dt, remain_amt, group_concat((select code_desc from code_dtl where code_val = sd.prd_type)) as description
+		from remain_payment r
+		left outer join sales_dtl sd on r.sales_seq = sd.sales_seq
+		where remain_amt - remain_payment_amt > 0
+		group by r.sales_seq
+	</select>
+	
+	<select id="selectRemainPayment" parameterType="com.ddgold.vo.RemainVO">
+		select sales_seq, sales_dt, remain_amt, remain_sales_seq, remain_sales_dt, remain_payment_amt
+		from remain_payment
+		<where>
+			<if test="salesSeq != null and salesSeq > 0">
+				and sales_seq = #{salesSeq}
+			</if>
+			<if test="remainSalesSeq != null and remainSalesSeq > 0">
+				and remain_sales_seq = #{remainSalesSeq}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertRemainSalesPayment" parameterType="com.ddgold.vo.RemainVO">
+		insert into remain_payment(sales_seq, sales_dt, remain_amt) values (
+			#{salesSeq}, #{salesDt}, #{remainAmt}
+		)
+	</insert>
+	
+	<update id="payRemainSalesPayment" parameterType="com.ddgold.vo.RemainVO">
+		update remain_payment set
+			remain_sales_seq = #{remainSalesSeq},
+			remain_sales_dt = #{remainSalesDt},
+			remain_payment_amt = #{remainPaymentAmt}
+			<if test="remainAmt != 0">
+			,remain_amt = #{remainAmt}
+			</if>
+		where sales_seq = #{salesSeq}
+	</update>
+	
+	<delete id="deleteRemainSalesPayment" parameterType="integer">
+		delete from remain_payment where sales_seq = #{salesSeq}
+	</delete>
+	
+	<select id="selectSales" parameterType="integer" resultMap="salesMap">
+		select 
+			m.sales_seq,
+			m.sales_dt,
+			m.prd_price,
+			m.sale_price,
+			m.payment_card_dtl,
+			m.payment_transfer_dtl,
+			m.payment_cash_dtl,
+			m.payment_gold_dtl,
+			m.payment_goods_dtl,
+			m.description,
+			d.sales_dtl_seq,
+			d.sales_type,
+			(select code_desc from code_dtl where code_grp='sales_type' and code_val=sales_type) sales_type_str,
+			d.prd_type,
+			(select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
+			d.karatage,
+			(select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+			d.weight,
+			d.prd_price as dtl_prd_price,
+			d.sale_price as dtl_sale_price,
+			r.remain_amt,
+			r.remain_sales_seq,
+			r.remain_sales_dt,
+			r.remain_payment_amt
+		from sales_mst m
+			left outer join sales_dtl d on m.sales_seq = d.sales_seq
+			left outer join remain_payment r on m.sales_seq = r.sales_seq
+		where
+			m.sales_seq = #{salesSeq}
+	</select>
+
+	<select id="selectSalesList" parameterType="com.ddgold.vo.SalesParamVO" resultMap="salesMap">
+		select 
+			m.sales_seq,
+			m.sales_dt,
+			m.prd_price,
+			m.sale_price,
+			m.payment_card_dtl,
+			m.payment_transfer_dtl,
+			m.payment_cash_dtl,
+			m.payment_gold_dtl,
+			m.payment_goods_dtl,
+			m.description,
+			d.sales_dtl_seq,
+			d.sales_type,
+			(select code_desc from code_dtl where code_grp='sales_type' and code_val=sales_type) sales_type_str,
+			d.prd_type,
+			(select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
+			d.karatage,
+			(select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+			d.weight,
+			d.prd_price as dtl_prd_price,
+			d.sale_price as dtl_sale_price,
+			r.remain_amt,
+			r.remain_sales_seq,
+			r.remain_sales_dt,
+			r.remain_payment_amt
+		from sales_mst m
+			left outer join sales_dtl d on m.sales_seq = d.sales_seq
+			left outer join remain_payment r on m.sales_seq = r.sales_seq
+		<where>
+			1=1
+			<if test="month != null and month != ''">
+				and m.sales_dt like concat(#{year}, '-', #{month}, '%')
+			</if>
+<!-- 			<if test="date != null and date != ''">
+				and m.sales_dt = concat(#{year}, '-', #{month}, '-', #{date})
+			</if> -->
+			<if test="salesType != null and salesType != ''">
+				and d.sales_type = #{salesType}
+			</if>
+			<if test="prdType != null and prdType != ''">
+				and d.prd_type = #{prdType}
+			</if>
+			<if test="karatage != null and karatage != ''">
+				and d.karatage = #{karatage}
+			</if>
+		</where>
+		<choose>
+			<when test="ordDirection == 'desc'">
+			order by m.sales_dt desc, m.sales_seq desc
+			</when>
+			<otherwise>
+			order by m.sales_dt, m.sales_seq
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insertSalesMst" parameterType="com.ddgold.vo.SalesMstVO">
+		insert into sales_mst (sales_dt, prd_price, sale_price, payment_card_dtl, payment_transfer_dtl, payment_cash_dtl,payment_gold_dtl, payment_goods_dtl, description) values 
+		(#{salesDt}, #{prdPrice}, #{salePrice}, #{paymentCardDtl}, #{paymentTransferDtl}, #{paymentCashDtl},#{paymentGoldDtl}, #{paymentGoodsDtl}, #{description})
+		
+		<selectKey order="AFTER" resultType="int" keyProperty="salesSeq">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<insert id="insertSalesDtl" parameterType="com.ddgold.vo.SalesDtlVO">
+		insert into sales_dtl (sales_seq, sales_type, prd_type, karatage, weight, prd_price, sale_price,labor_cost, diff_price) values
+		(#{salesSeq}, #{salesType}, #{prdType}, #{karatage}, #{weight}, #{dtlPrdPrice}, #{dtlSalePrice}, #{laborCost}, #{diffPrice}) 
+	</insert>
+	
+	<update id="updateSalesMst" parameterType="com.ddgold.vo.SalesMstVO">
+		update sales_mst 
+		<set>
+			<if test="salesDt != null and salesDt != ''">
+				sales_dt = #{salesDt}
+			</if>
+			<if test="prdPrice != null and prdPrice != '' and prdPrice != '0'">
+				prd_price = #{prdPrice}
+			</if>
+			<if test="salePrice != null and salePrice != '' and salePrice != '0'">
+				sale_price = #{salePrice}
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description}
+			</if>
+		</set>
+		where 
+			sales_seq=#{salesSeq}
+	</update>
+	
+	<delete id="deleteSalesMst" parameterType="integer">
+		delete from sales_mst
+		where sales_seq = #{salesSeq}
+	</delete>
+
+	<delete id="deleteSalesDtl" parameterType="integer">
+		delete from sales_dtl
+		where sales_dtl_seq = #{salesDtlSeq}
+	</delete>
+
+	<delete id="deleteSalesDtls" parameterType="integer">
+		delete from sales_dtl
+		where sales_seq = #{salesSeq}
+	</delete>
+</mapper>
