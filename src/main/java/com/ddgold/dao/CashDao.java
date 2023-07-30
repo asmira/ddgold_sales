@@ -6,7 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.ddgold.vo.CashOnHandVO;
 import com.ddgold.vo.SalesParamVO;
-import com.ddgold.vo.SalesVO;
 
 @Mapper
 public interface CashDao {

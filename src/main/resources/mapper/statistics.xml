@@ -62,7 +62,7 @@
 					</otherwise>
 				</choose>
 			</where>
-			group by sales_seq, sales_dt
+			group by sales_seq, sales_dtl, sales_dt
 		) a
 		group by sales_dt
 	</select>
@@ -109,7 +109,7 @@
 		where 
 			d.sales_type != 6
 			and m.sales_dt like concat(#{year}, '-', #{month}, '%')
-		group by sales_seq, sales_dt
+		group by sales_seq, sales_dtl, sales_dt
 	) a
 	group by wd
 	</select>
@@ -155,7 +155,7 @@
 			left outer join sales_dtl d on m.sales_seq = d.sales_seq
 			where d.sales_type != 6
 				and m.sales_dt like concat(#{year}, '%')
-			group by sales_seq, sales_dt
+			group by sales_seq, sales_dtl, sales_dt
 		) a
 		group by m
 	</select>

@@ -1,14 +1,11 @@
 package com.ddgold.dao;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.ddgold.vo.CashOnHandVO;
 import com.ddgold.vo.PaymentStatisticsVO;
 import com.ddgold.vo.SalesParamVO;
-import com.ddgold.vo.SalesVO;
 import com.ddgold.vo.StatisticsVO;
 
 @Mapper

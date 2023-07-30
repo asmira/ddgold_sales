@@ -1,8 +1,5 @@
 package com.ddgold.vo;
 
-import java.util.Date;
-import java.util.List;
-
 public class StatisticsVO {
 	private String colValue;
 	private int k14;

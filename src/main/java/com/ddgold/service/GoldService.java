@@ -2,7 +2,6 @@ package com.ddgold.service;
 
 import java.util.List;
 
-import com.ddgold.vo.CodeVO;
 import com.ddgold.vo.GoldVO;
 import com.ddgold.vo.SalesParamVO;
 

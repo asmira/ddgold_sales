@@ -2,7 +2,7 @@
 	#sales th  {
 		position: sticky;
 		top: 110px;
-		font-size:15px;
+		font-size:14px;
 	}
 	#sales td {
 		font-size:14px;
@@ -165,7 +165,7 @@
 		$("select[name=dt]").html(html);
 		$("select[name=dt]").change(function(e){
 			makeHtml(e.target.value);
-		});;
+		});
 	}
 	
 	function makeHtml(dt) {
@@ -180,9 +180,9 @@
 			html += '<tr class="salesRow">';
 			html += '	<td class="text-center salesSeq"'+rowspanStr+'>'+s.salesSeq+'</td>'
 			html += '	<td class="text-center"'+rowspanStr+'>'+s.salesDt+'</td>'
-			html += '	<td class="text-end">'+s.salesDtlList[0].salesTypeStr+'</td>'
-			html += '	<td class="text-end">'+(s.salesDtlList[0].prdTypeStr||'')+'</td>'
-			html += '	<td class="text-end">'+(s.salesDtlList[0].karatageStr||'')+(s.salesDtlList[0].weight*1>0?"("+s.salesDtlList[0].weight+"돈)":'')+'</td>'
+			html += '	<td class="text-center">'+s.salesDtlList[0].salesTypeStr+'</td>'
+			html += '	<td class="text-center">'+(s.salesDtlList[0].prdTypeStr||'')+'</td>'
+			html += '	<td class="text-start">'+(s.salesDtlList[0].karatageStr||'')+(s.salesDtlList[0].weight*1>0?"("+s.salesDtlList[0].weight+"돈)":'')+'</td>'
 			if(s.salesDtlList[0].dtlSalePrice > 0) {
 			//	html += '	<td>'+nf.format(s.salesDtlList[0].dtlPrdPrice)+'</td>'
 				html += '	<td class="text-end">'+nf.format(s.salesDtlList[0].dtlSalePrice)+'</td>'
@@ -203,15 +203,15 @@
 						? ((s.remain.remainAmt - s.remain.remainPaymentAmt) + ((s.remain?.remainSalesDt)?'('+ s.remain.remainSalesDt +'납부)':''))
 						: s.remain.remainAmt)
 			+'</td>';
-			html += '	<td'+rowspanStr+' class="text-end">'+(s.description||"")+'</td>'
+			html += '	<td'+rowspanStr+' class="text-start">'+(s.description||"")+'</td>'
 			html += '</tr>'
 			if(s.salesDtlList?.length > 1) {
 				for(let i=1; i<s.salesDtlList.length;i++){
 					const dtl = s.salesDtlList[i];
 					html += '<tr>';
-					html += '	<td>'+dtl.salesTypeStr||''+'</td>'
-					html += '	<td>'+dtl.prdTypeStr||''+'</td>'
-					html += '	<td>'+dtl.karatageStr+(dtl.weight*1>0?"("+dtl.weight+"돈)":'')+'</td>'
+					html += '	<td class="text-center">'+dtl.salesTypeStr||''+'</td>'
+					html += '	<td class="text-center">'+dtl.prdTypeStr||''+'</td>'
+					html += '	<td class="text-start">'+dtl.karatageStr+(dtl.weight*1>0?"("+dtl.weight+"돈)":'')+'</td>'
 					if(s.salesDtlList[0].dtlSalePrice > 0) {
 						// html += '	<td>'+nf.format(s.salesDtlList[i].dtlPrdPrice)+'</td>'
 						html += '	<td class="text-end">'+nf.format(s.salesDtlList[i].dtlSalePrice)+'</td>'
@@ -231,7 +231,6 @@
 				"일지삭제", 
 				"일지를 삭제 하시겠습니까?",
 				function() {
-					console.log(param)
 					$.ajax({
 						url: "/api/deleteSales", 
 						data: JSON.stringify(param),

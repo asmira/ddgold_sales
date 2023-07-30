@@ -101,12 +101,13 @@
 
 	function makeDt(list) {
 		const $sel = $("[name=dt]");
-		const dts = list.map(l => l.cashDt);
-		const dtSet = new Set(dtlist);
+		const dts = list.map(l => l.goldDt);
+		const dtSet = new Set(dts);
 		const dtList = [...dtSet];
 	}
 						
 	function initPage() {
+		
 		const selects = ['year','month'];
 		for(const sel of selects) {
 			$("select[name="+sel+"]").val(initParam[sel]);
@@ -144,58 +145,66 @@
 	function getList(callback) {
 		$.get("/api/goldList", function(res) {
 			currentList = JSON.parse(res);
-			var nf = Intl.NumberFormat()
-			let prevDt="";
-			let html = "";
-			for(const l of currentList) {
-				let prev10k = 0, prev14k = 0, prev18k=0, prev24k=0, prevDiamond=0;
-				let prevTransfer = 0, prevCash = 0, prevGoods=0, prevGold=0;
-				
-				if(!!prevDt && l.goldDt != prevDt) {
-					let prevList = currentList.filter(c => c.goldDt == prevDt);
-					prevList.map(c => prev10k += c.k10);
-					prevList.map(c => prev14k += c.k14);
-					prevList.map(c => prev18k += c.k18);
-					prevList.map(c => prev24k += c.k24);
-					prevList.map(c => prevDiamond += c.diamond);
-					prevList.map(c => prevTransfer += c.transfer);
-					prevList.map(c => prevCash += c.cash);
-					prevList.map(c => prevGoods += c.goods);
-					prevList.map(c => prevGold += c.gold);
-					html += "<tr>";
-					html += "	<td>"+prevDt+" 소계</td>";
-					html += "	<td>"+nf.format(prev10k)+"</td>";
-					html += "	<td>"+nf.format(prev14k)+"</td>";
-					html += "	<td>"+nf.format(prev18k)+"</td>";
-					html += "	<td>"+nf.format(prev24k)+"</td>";
-					html += "	<td>"+nf.format(prevDiamond)+"</td>";
-					html += "	<td>"+nf.format(prev10k+prev14k+prev18k+prev24k+prevDiamond)+"</td>";
-					html += "	<td>"+nf.format(prevTransfer)+"</td>";
-					html += "	<td>"+nf.format(prevCash)+"</td>";
-					html += "	<td>"+nf.format(prevGoods)+"</td>";
-					html += "	<td>"+nf.format(prevGold)+"</td>";
-					html += "	<td>"+nf.format(prevTransfer+prevCash+prevGoods+prevGold)+"</td>";
-					html += "</tr>";
-				}
-				console.log(l.k10,l.k14,l.k18,l.k24,l.diamond)
-				html += "<tr class='goldRow' data-seq='"+l.goldSeq+"'>";
-				html += "	<td class='dt'>"+l.goldDt+"</td>";
-				html += "	<td>"+nf.format(l.k10)+"</td>";
-				html += "	<td>"+nf.format(l.k14)+"</td>";
-				html += "	<td>"+nf.format(l.k18)+"</td>";
-				html += "	<td>"+nf.format(l.k24)+"</td>";
-				html += "	<td>"+nf.format(l.diamond)+"</td>";
-				html += "	<td>"+nf.format(l.k10+l.k14+l.k18+l.k24+l.diamond)+"</td>";
-				html += "	<td>"+nf.format(l.transfer)+"</td>";
-				html += "	<td>"+nf.format(l.cash)+"</td>";
-				html += "	<td>"+nf.format(l.goods)+"</td>";
-				html += "	<td>"+nf.format(l.gold)+"</td>";
-				html += "	<td>"+nf.format(l.transfer+l.cash+l.goods)+"</td>";
-				html += "</tr>";
-				prevDt = l.goldDt;
-			}
-			$("#gold tbody").html(html);
+			makeDt(currentList);
+			drawList(currentList);
 			(callback) && callback();	
 		});
 	}
+
+	function drawList(list) {
+		var nf = Intl.NumberFormat();
+		let prevDt="";
+		let html = "";
+
+		for(const l of list) {
+			let prev10k = 0, prev14k = 0, prev18k=0, prev24k=0, 
+				prevDiamond=0, prevTransfer = 0, prevCash = 0, 
+				prevGoods=0, prevGold=0;
+			
+			if(!!prevDt && l.goldDt != prevDt) {
+				let prevList = currentList.filter(c => c.goldDt == prevDt);
+				prevList.map(c => {
+					prev10k += c.k10;
+					prev14k += c.k14
+					prev18k += c.k18;
+					prev24k += c.k24;
+					prevDiamond += c.diamond;
+					prevTransfer += c.transfer;
+					prevCash += c.cash;
+					prevGoods += c.goods;
+					prevGold += c.gold;
+				});
+				html += "<tr>";
+				html += "	<td>"+prevDt+" 소계</td>";
+				html += "	<td>"+nf.format(prev10k)+"</td>";
+				html += "	<td>"+nf.format(prev14k)+"</td>";
+				html += "	<td>"+nf.format(prev18k)+"</td>";
+				html += "	<td>"+nf.format(prev24k)+"</td>";
+				html += "	<td>"+nf.format(prevDiamond)+"</td>";
+				html += "	<td>"+nf.format(prev10k+prev14k+prev18k+prev24k+prevDiamond)+"</td>";
+				html += "	<td>"+nf.format(prevTransfer)+"</td>";
+				html += "	<td>"+nf.format(prevCash)+"</td>";
+				html += "	<td>"+nf.format(prevGoods)+"</td>";
+				html += "	<td>"+nf.format(prevGold)+"</td>";
+				html += "	<td>"+nf.format(prevTransfer+prevCash+prevGoods+prevGold)+"</td>";
+				html += "</tr>";
+			}
+			html += "<tr class='goldRow' data-seq='"+l.goldSeq+"'>";
+			html += "	<td class='dt'>"+l.goldDt+"</td>";
+			html += "	<td>"+nf.format(l.k10)+"</td>";
+			html += "	<td>"+nf.format(l.k14)+"</td>";
+			html += "	<td>"+nf.format(l.k18)+"</td>";
+			html += "	<td>"+nf.format(l.k24)+"</td>";
+			html += "	<td>"+nf.format(l.diamond)+"</td>";
+			html += "	<td>"+nf.format(l.k10+l.k14+l.k18+l.k24+l.diamond)+"</td>";
+			html += "	<td>"+nf.format(l.transfer)+"</td>";
+			html += "	<td>"+nf.format(l.cash)+"</td>";
+			html += "	<td>"+nf.format(l.goods)+"</td>";
+			html += "	<td>"+nf.format(l.gold)+"</td>";
+			html += "	<td>"+nf.format(l.transfer+l.cash+l.goods)+"</td>";
+			html += "</tr>";
+			prevDt = l.goldDt;
+		}
+		$("#gold tbody").html(html);
+	} 
 </script>

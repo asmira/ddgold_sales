@@ -77,7 +77,7 @@
 		
 		const goldModal = document.getElementById("goldModal");
 		goldModal.addEventListener('show.bs.modal', function (event) {
-		  $('#goldDt').val($("#gold .dt:last").text()||today)
+		  $('#goldDt').val(today)
 		});
 	});
 
