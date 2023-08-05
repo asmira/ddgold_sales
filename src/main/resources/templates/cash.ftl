@@ -1,7 +1,7 @@
 <style>
 	#cash th {
 		position: sticky;
-		top: 85px;
+		top: 95px;
 	}
 </style>
 
@@ -20,8 +20,8 @@
   </li>
 </ul>
 
-<div class="card mb-4">
-	<div class="card-body sticky-top" style="top:40px;">
+<div class="card mb-4" style="position: sticky; top:40px;">
+	<div class="card-body sticky-top">
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">

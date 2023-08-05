@@ -134,6 +134,12 @@ public class PageController {
 		} else {
 			param.setMonth(String.format("%02s",param.getMonth()));
 		}
+		CodeVO cvo1 = new CodeVO();
+		List<CodeVO> cvoAll = codeService.getCodes(cvo1);
+		
+		mv.addObject("salesTypes", filterSpecificCode(cvoAll, "sales_type"));
+		mv.addObject("karatages", filterSpecificCode(cvoAll, "karatage"));
+		mv.addObject("prdTypes", filterSpecificCode(cvoAll, "prd_type"));
 		
 		mv.addObject("title","A/S대장");
 		mv.addObject("salesParam",param);

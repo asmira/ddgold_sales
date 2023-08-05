@@ -9,12 +9,19 @@ public class SalesDtlVO {
 	private String prdTypeStr;
 	private String karatage;
 	private String karatageStr;
+	private int buyingPrice;
 	private float weight;
 	private int laborCost;
 	private int dtlPrdPrice;
 	private int dtlSalePrice;
 	private int diffPrice;
 
+	public int getBuyingPrice() {
+		return buyingPrice;
+	}
+	public void setBuyingPrice(int buyingPrice) {
+		this.buyingPrice = buyingPrice;
+	}
 	public int getDiffPrice() { 
 		return diffPrice;
 	}

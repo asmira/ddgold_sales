@@ -125,6 +125,60 @@ public class SalesServiceImpl implements SalesService {
 
 	@Override
 	@Transactional
+	public int updateSales(SalesVO po) {
+		int cnt = 0;
+		// update mst
+		cnt += salesDao.updateSalesMst(po);
+
+		// delete dtl
+		cnt += salesDao.deleteSalesDtls(po.getSalesSeq());
+		// insert dtl
+		List<SalesDtlVO> dtlList = po.getSalesDtlList();
+		for(SalesDtlVO dtl : dtlList) {
+			dtl.setSalesSeq(po.getSalesSeq());
+			cnt += salesDao.insertSalesDtl(dtl);
+		}
+
+		// update or delete and insert remain
+		int totalPayment = po.getTotalPayment();
+		boolean isRemainPayment = po.getSalesDtlList() != null 
+				&& po.getSalesDtlList().size() > 0
+				&& "6".equals(po.getSalesDtlList().get(0).getSalesType());
+		
+		// 잔고처리
+		if(isRemainPayment) {
+			RemainVO rvo = new RemainVO();
+			rvo.setSalesSeq(po.getRemainTargetSeq());
+			rvo.setRemainSalesDt(po.getSalesDt());
+			rvo.setRemainSalesSeq(po.getSalesSeq());
+			rvo.setRemainPaymentAmt(totalPayment);
+			rvo.setRemainAmt(totalPayment);
+			salesDao.payRemainSalesPayment(rvo);
+
+			// 기존 판매액 업데이트
+			SalesVO tvo = salesDao.selectSales(po.getRemainTargetSeq());
+			SalesVO uvo = new SalesVO();
+			uvo.setSalesSeq(po.getRemainTargetSeq());
+			uvo.setSalePrice(tvo.getTotalPayment() + totalPayment);
+			salesDao.updateSalesMst(uvo);
+
+		} else if(po.getSalePrice()-totalPayment > 0) {
+			// delete remain
+			salesDao.deleteRemainSalesPayment(po.getSalesSeq());
+
+			// 잔고등록
+			RemainVO rvo = new RemainVO();
+			rvo.setSalesSeq(po.getSalesSeq());
+			rvo.setSalesDt(po.getSalesDt());
+			rvo.setRemainAmt(po.getSalePrice()-totalPayment);
+			
+			salesDao.insertRemainSalesPayment(rvo);
+		}
+		return cnt;
+	}
+
+	@Override
+	@Transactional
 	public int deleteSales(int salesSeq) {
 		SalesVO vo = salesDao.selectSales(salesSeq);
 		int res =0;

@@ -76,6 +76,19 @@ public class SalesController {
 	}
 
 	@ResponseBody
+	@PostMapping("/api/updateSales")
+	public String updateSales(@RequestBody SalesVO po) {
+		System.out.println(po);
+		salesService.updateSales(po);
+		
+		HashMap<String, String> result = new HashMap<>();
+		result.put("result", "success");
+		
+		Gson gson = new Gson();
+		return gson.toJson(result);
+	}
+
+	@ResponseBody
 	@PostMapping("/api/deleteSales")
 	public String deleteSales(@RequestBody SalesVO po) {
 		System.out.println(po);

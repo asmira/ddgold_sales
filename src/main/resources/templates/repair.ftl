@@ -1,7 +1,7 @@
 <style>
 	#sales th  {
 		position: sticky;
-		top: 85px;
+		top: 95px;
 		font-size:15px;
 	}
 	#sales td {
@@ -25,8 +25,8 @@
 </ul>
 
 
-<div class="card mb-4">
-	<div class="card-body sticky-top" style="top:40px;">
+<div class="card mb-4" style="position: sticky; top:40px;">
+	<div class="card-body sticky-top">
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">
@@ -62,22 +62,24 @@
 		  	</div>
 		</form>
 	</div>
+</div>
 
-  <table class="table table-bordered">
+<table class="table table-bordered" id="repairTable">
     <thead class="text-center">
-      <th>연번</th>
-      <th>입고일</th>
-      <th>고객명</th>
-      <th>연락처</th>
-      <th>순도</th>
-      <th>제품</th>
+      <th style="width:5%">연번</th>
+      <th class="col-1">입고일</th>
+      <th class="col-1">고객명</th>
+      <th style="width:12%">연락처</th>
+      <th class="col-1">순도</th> 
+      <th class="col-1">제품</th>
       <th>수리내용</th>
-      <th>출고일</th>
-      <th>반납여부</th>
+      <th class="col-1">출고일</th>
+      <th class="col-1">반납일</th>
     </thead>
     <tbody>
     </tbody>
-  </table>
+</table>
+<#include "./repairForm.ftl">
 <script type="text/javascript">
   $(document).ready(function(){
     initPage();
@@ -109,17 +111,39 @@
 
   function getList() {
     $.get("/api/repairList", function(res) {
-			currentList = JSON.parse(res);
-			
+		const currentList = JSON.parse(res);
+		console.log(currentList)
+		drawTable(currentList);
     });
   }
 
   function drawTable(arr){
-    var nf = Intl.NumberFormat()
-		let html = "";
-    arr.each((data,idx) => {
-
+    const nf = Intl.NumberFormat()
+	let html = "";
+    $(arr)?.each((idx,data) => {
+		console.log(data,idx);
+		html+="<tr>";
+		html+="	<td>"+data.repairSeq+"</td>";
+		html+="	<td>"+data.repairDate+"</td>";
+		html+="	<td>"+data.repairName+"</td>";
+		html+="	<td>"+data.repairMobile+"</td>";
+		html+="	<td>"+data.karatageStr+"</td>";
+		html+="	<td>"+data.prdTypeStr+"</td>";
+		html+="	<td>"+data.repairDesc+"</td>";
+		if(data.receiptDate) {
+			html+="	<td>"+data.receiptDate+"</td>";
+		} else {
+			html+="	<td class='text-center'><button type='button'>출고접수</button></td>";
+		}
+		if(data.receiptDate) {
+			html+="	<td>"+data.finishDate+"</td>";
+		} else {
+			html+="	<td class='text-center'><button type='button'>반납처리</button></td>";
+		}
+		html+="</tr>";
     });
+	$("#repairTable tbody").html(html)
+
   }
 
   

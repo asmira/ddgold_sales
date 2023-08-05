@@ -24,8 +24,8 @@
   </li>
 </ul>
 
-<div class="card mb-4" >
-	<div class="card-body sticky-top" style="top:50px;">
+<div class="card mb-4" style="position: sticky; top:50px;">
+	<div class="card-body sticky-top">
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">
@@ -83,6 +83,8 @@
 		    		<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#salesModal">일지 등록</button>
 		    	</div>
 		  	</div>
+			<input type="hidden" name="mode" value="" /> 
+			<input type="hidden" name="updSalesSeq" value="" /> 
 		</form>
 	</div>
 </div>
@@ -119,7 +121,8 @@
 	$(document).ready(function(){
 		initPage();
 		getList();
-		deleteRow();
+		//deleteRow();
+		updateRow();
 	});
 	
 	let initParam = {};
@@ -201,7 +204,7 @@
 			html += '	<td'+rowspanStr+' class="text-end">'+
 					(s.remain && s.remain.remainSalesSeq > 0 
 						? ((s.remain.remainAmt - s.remain.remainPaymentAmt) + ((s.remain?.remainSalesDt)?'('+ s.remain.remainSalesDt +'납부)':''))
-						: s.remain.remainAmt)
+						: s.remain?.remainAmt||0)
 			+'</td>';
 			html += '	<td'+rowspanStr+' class="text-start">'+(s.description||"")+'</td>'
 			html += '</tr>'
@@ -224,28 +227,14 @@
 		$("#sales>tbody").html(html);
 	}
 	
-	function deleteRow() {
+	function updateRow() {
 		$("#sales tbody").on('dblclick','.salesRow', function(e) {
-			const param =  {salesSeq: $('.salesSeq',$(e.target).parent()).text()};
-			openConfirm(
-				"일지삭제", 
-				"일지를 삭제 하시겠습니까?",
-				function() {
-					$.ajax({
-						url: "/api/deleteSales", 
-						data: JSON.stringify(param),
-						contentType: "application/json;charset=UTF-8",
-						method: "POST",
-						dataType: "json",
-						success: function(res) {
-							getList();
-							alert('삭제되었습니다.');
-						}, fail: function(res) {
-							alert('삭제중 오류가 발생하였습니다.');
-						}
-					})
-				}
-			);
+			$name('mode').val('update');
+			$name('updSalesSeq').val($('.salesSeq',$(e.target).parent()).text());
+
+			var modalEl = document.getElementById('salesModal');
+			var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+			modal.show();
 		});
 	}
 	

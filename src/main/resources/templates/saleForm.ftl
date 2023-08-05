@@ -5,7 +5,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content"> 
       <div class="modal-header">
-        <h5 class="modal-title" id="salesModalLabel">영업일지등록</h5>
+        <h5 class="modal-title" id="salesModalLabel">영업일지 <span id="modeTtl">등록</span></h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -137,6 +137,7 @@
 		</form>
 	  </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-primary" style="display:none;" id="deleteSales" onclick="deleteSales()">삭제</button>
         <button type="button" class="btn btn-primary" id="saveSales">Save changes</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
@@ -182,7 +183,6 @@
 			fieldName = 'salesDt' 
 			isValid= false;
 		} 
-		
 		// 잔금처리아닐때 판매금액 필수
 		else if(!isRemainPayment && (!$name('salePrice',$frm).val() || $name('salePrice',$frm).val() == 0)){
 			fieldName = 'salePrice'
@@ -194,14 +194,6 @@
 			fieldName = 'paymentCardDtl'
 			isValid= false;
 		}
-		
-		// 잔금처리일때 납부금액은 잔금과 동일해야함 
-		/*else if(isRemainPayment && $("[name=remainTargetSeq] option:selected").data("remainAmt") != paymentTotal) {
-			fieldName = 'paymentCardDtl'
-			console.log($("[name=remainTargetSeq] option:selected").data("remainAmt"))
-			validMsg = '잔금과 납부금액이 맞지 않습니다.';
-			isValid= false;
-		}*/
 		else {
 			$(".row").each((idx,row) => {
 				// 금이면 무게/판매가/기준액 필수
@@ -244,6 +236,9 @@
 	}
 	
 	function save() {
+		const mode = $name('mode').val()
+		const salesSeq = $name('updSalesSeq').val();
+
 		const $frm = $name('salesForm');
 
 		const mngParam = {
@@ -270,6 +265,7 @@
 				,prdType: $name('prdType',$(row)).val()
 			}
 			if(karatage == 3) {
+				dtlParam.buyingPrice = $name('buyingPrice',$(row)).val();
 				dtlParam.dtlPrdPrice = 0;
 				dtlParam.weight = $name('weight',$(row)).val()
 				dtlParam.laborCost = $name('dtlLaborCost',$(row)).val()
@@ -289,7 +285,8 @@
 				dtlParam.dtlSalePrice = 0;
 			}
 			dtlParams.push(dtlParam);
-		})
+		});
+
 		mngParam.salesDtlList = dtlParams;
 		let confirmable = true;
 		if(isRemainPayment) {
@@ -300,49 +297,145 @@
 			if(remainAmt != totalPayment - diffPrice) {
 				confirmable = confirm('제품 판매액이 변경됩니다.(잔액 : '+remainAmt+', 제품납부액 : '+(totalPayment - diffPrice)+')\n 저장하시겠습니까?')
 			}
+		} else if(mode == 'update') {
+			confirmable = confirm('수정하시겠습니까?');
 		}
 
 		if(confirmable) {
+			if(mode == 'update') {
+				mngParam.salesSeq = salesSeq;
+			}
 			$.ajax({
-				url: "/api/insertSales", 
+				url: (mode == 'update')?"/api/updateSales":"/api/insertSales", 
 				data: JSON.stringify(mngParam),
 				contentType: "application/json;charset=UTF-8",
 				method: "POST",
 				dataType: "json",
 				success: function(res) {
 					getList();
-					alert('등록되었습니다.');
+					alert(((mode == 'update')?'수정':'등록')+'되었습니다.');
 				}, fail: function(res) {
-					alert('등록중 오류가 발생하였습니다.');
+					alert(((mode == 'update')?'수정':'등록')+'중 오류가 발생하였습니다.');
 				}
 			});
 		}
 	}
 	
+	function deleteSales() {
+		const param =  {salesSeq:  $name('updSalesSeq').val()};
+		if(confirm('삭제하시겠습니까?')){
+			$.ajax({
+				url: "/api/deleteSales", 
+				data: JSON.stringify(param),
+				contentType: "application/json;charset=UTF-8",
+				method: "POST",
+				dataType: "json",
+				success: function(res) {
+					getList();
+					alert('삭제되었습니다.');
+				}, fail: function(res) {
+					alert('삭제중 오류가 발생하였습니다.');
+				}
+			})
+		}
+	}
+
+	function makeRemainOptions(remainTargetSeq) {
+		$.get("/api/salesRemainList",{},function(res) {
+			const list = JSON.parse(res);
+			$("select[name=remainTargetSeq] option").remove();
+			
+			let html = "";
+			for(const r of list) {
+				html += "<option value='"+r.salesSeq+"' data-remain-amt='"+r.remainAmt+"'>"+r.salesDt + " | "+ r.description + " | "+r.remainAmt+"</option>";
+			}
+			
+			$("select[name=remainTargetSeq]").append(html);
+			$("select[name=remainTargetSeq]").off('change');
+			$("select[name=remainTargetSeq]").val(remainTargetSeq);
+		});
+	}
+
+	function fillUpdateForm(sales) {
+		console.log(sales);
+		const isRemainPayment = sales?.salesDtlList[0]?.salesType == '6';
+		const $frm = $name('salesForm');
+		
+		$name('salesDt',$frm).val(sales.salesDt);
+		$name('prdPrice',$frm).val(sales.prdPrice);
+		$name('salePrice',$frm).val(sales.salePrice);
+		$name('paymentCardDtl',$frm).val(sales.paymentCardDtl);
+		$name('paymentTransferDtl',$frm).val(sales.paymentTransferDtl);
+		$name('paymentCashDtl',$frm).val(sales.paymentCashDtl);
+		$name('paymentGoldDtl',$frm).val(sales.paymentGoldDtl);
+		$name('paymentGoodsDtl',$frm).val(sales.paymentGoodsDtl);
+		$name('description',$frm).val(sales.description);
+		$name('remainTargetSeq',$frm).val(sales.updSalesSeq);
+		
+		const dtlLength = sales?.salesDtlList?.length || 0;
+		for(var i = 1; i < dtlLength; i++) {
+			$("#prdAdd").click();
+		}
+		
+		for(const idx in sales?.salesDtlList) {
+			const dtl = sales.salesDtlList[idx];
+			const $curRow = $(".prdDtl .prdRow:eq("+idx+")");
+			
+			$name('salesType',$curRow).val(dtl.salesType);
+			$name('salesType',$curRow).change();
+			
+			if(!isRemainPayment) {
+				$name('prdType',$curRow).val(dtl.prdType);
+				$name('karatage',$curRow).val(dtl.karatage);
+				$name('karatage',$curRow).change();
+				if(dtl.karatage == '3') {
+					console.log(dtl.buyingPrice, dtl.laborCost)
+					$name('buyingPrice', $curRow).val(dtl.buyingPrice);
+					$name('weight', $curRow).val(dtl.weight);
+					$name('dtlLaborCost',$curRow).val(dtl.laborCost);
+					$name('dtlLaborCost',$curRow).blur();
+				}
+			} else {
+				const remain = sales.remain;
+				$name("diffPrice", $curRow).val(remain.diffPrice);
+			}
+		}
+	}
+
 	$(document).ready(function(){
 		//reset form
 		var salesModalEl = document.getElementById('salesModal')
 		
 		salesModalEl.addEventListener('hidden.bs.modal', function (event) {
 		  $("[name=salesForm]").get(0).reset();
-		  $(".prdRow:gt(0)").remove()
+		  $(".prdRow:gt(0)").remove();
+		  $name('mode').val('');
+		  $name('updSalesSeq').val('');
+		  $("#deleteSales").hide();
 		})
 		
 		// set default date on open		
 		salesModalEl.addEventListener('show.bs.modal', function (event) {
-		  $('#salesDtFrm').val(today);
-		  $.get("/api/salesRemainList",{},function(res) {
-		  	const list = JSON.parse(res);
-		  	$("select[name=remainTargetSeq] option").remove();
-		  	
-		  	let html = "";
-		  	for(const r of list) {
-		  		html += "<option value='"+r.salesSeq+"' data-remain-amt='"+r.remainAmt+"'>"+r.salesDt + " | "+ r.description + " | "+r.remainAmt+"</option>";
-		  	}
-		  	
-		  	$("select[name=remainTargetSeq]").append(html);
-		  	$("select[name=remainTargetSeq]").off('change');
-		  })
+		  const mode = $name('mode').val();
+		  if(mode === 'update') {
+			$("#deleteSales").show();
+		  	$("#modeTtl").text("수정");
+			const updSalesSeq = $name('updSalesSeq').val();
+
+			$.get("/api/sales/"+updSalesSeq,{},function(res) {
+				const sales = JSON.parse(res);
+				
+				fillUpdateForm(sales)
+
+				const isRemainPayment = sales?.salesDtlList[0]?.salesType == '6';
+				const remainTargetSeq = isRemainPayment? sales.remain.salesSeq : null;
+				makeRemainOptions(remainTargetSeq);
+			});
+		  } else {
+			$("#modeTtl").text("등록");
+			$('#salesDtFrm').val(today);
+			 makeRemainOptions();
+		  }
 		})
 
 		$("#cancelPrevPayment").click(function(e) {
@@ -359,6 +452,7 @@
 					'paymentGoodsDtl',
 					'paymentTransferDtl',	
 				];
+		
 				for(var p of payments) {
 					if(sales[p] != 0) {
 						$name(p).val(sales[p]*-1);

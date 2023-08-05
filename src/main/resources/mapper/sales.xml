@@ -16,7 +16,7 @@
 	    <result property="description" column="DESCRIPTION"/>
 	    <association property="remain" column="salesSeq" javaType="com.ddgold.vo.RemainVO">
 	    	<id property="remainSeq" column="remain_seq"/>
-	    	<result property="salesSeq" column="sales_seq"/>
+	    	<result property="salesSeq" column="remain_target_seq"/>
 	    	<result property="remainAmt" column="remain_amt"/>
 	    	<result property="remainSalesSeq" column="remain_sales_seq"/>
 	    	<result property="remainSalesDt" column="remain_sales_dt"/>
@@ -32,7 +32,9 @@
 			<result property="prdTypeStr"	column="PRD_TYPE_STR"/>
 			<result property="karatage"	column="KARATAGE"/>
 			<result property="karatageStr"	column="KARATAGE_STR"/>
+			<result property="buyingPrice"	column="BUYING_PRICE"/>
 			<result property="weight"	column="WEIGHT"/>
+			<result property="laborCost"	column="labor_cost"/>
 			<result property="dtlPrdPrice"	column="DTL_PRD_PRICE"/>
 			<result property="dtlSalePrice"	column="DTL_SALE_PRICE"/>
 	    </collection>
@@ -42,7 +44,7 @@
 		select r.sales_seq, r.sales_dt, remain_amt, group_concat((select code_desc from code_dtl where code_val = sd.prd_type)) as description
 		from remain_payment r
 		left outer join sales_dtl sd on r.sales_seq = sd.sales_seq
-		where remain_amt - remain_payment_amt > 0
+		/* where remain_amt - remain_payment_amt > 0 */
 		group by r.sales_seq
 	</select>
 	
@@ -99,16 +101,20 @@
 			(select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
 			d.karatage,
 			(select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+			d.buying_price,
 			d.weight,
+			d.labor_cost,
 			d.prd_price as dtl_prd_price,
 			d.sale_price as dtl_sale_price,
+			r.remain_seq,
+			r.sales_seq as remain_target_seq,
 			r.remain_amt,
 			r.remain_sales_seq,
 			r.remain_sales_dt,
 			r.remain_payment_amt
 		from sales_mst m
 			left outer join sales_dtl d on m.sales_seq = d.sales_seq
-			left outer join remain_payment r on m.sales_seq = r.sales_seq
+			left outer join remain_payment r on (m.sales_seq = r.sales_seq or m.sales_seq = r.remain_sales_seq)
 		where
 			m.sales_seq = #{salesSeq}
 	</select>
@@ -132,16 +138,20 @@
 			(select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
 			d.karatage,
 			(select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
+			d.buying_price,
 			d.weight,
+			d.labor_cost,
 			d.prd_price as dtl_prd_price,
 			d.sale_price as dtl_sale_price,
+			r.remain_seq,
+			r.sales_seq as remain_target_seq,
 			r.remain_amt,
 			r.remain_sales_seq,
 			r.remain_sales_dt,
 			r.remain_payment_amt
 		from sales_mst m
 			left outer join sales_dtl d on m.sales_seq = d.sales_seq
-			left outer join remain_payment r on m.sales_seq = r.sales_seq
+			left outer join remain_payment r on (m.sales_seq = r.sales_seq or m.sales_seq = r.remain_sales_seq)
 		<where>
 			1=1
 			<if test="month != null and month != ''">
@@ -180,25 +190,65 @@
 	</insert>
 	
 	<insert id="insertSalesDtl" parameterType="com.ddgold.vo.SalesDtlVO">
-		insert into sales_dtl (sales_seq, sales_type, prd_type, karatage, weight, prd_price, sale_price,labor_cost, diff_price) values
-		(#{salesSeq}, #{salesType}, #{prdType}, #{karatage}, #{weight}, #{dtlPrdPrice}, #{dtlSalePrice}, #{laborCost}, #{diffPrice}) 
+		insert into sales_dtl (sales_seq, sales_type, prd_type, karatage,buying_price, weight, prd_price, sale_price,labor_cost, diff_price) values
+		(#{salesSeq}, #{salesType}, #{prdType}, #{karatage}, #{buyingPrice}, #{weight}, #{dtlPrdPrice}, #{dtlSalePrice}, #{laborCost}, #{diffPrice}) 
 	</insert>
 	
 	<update id="updateSalesMst" parameterType="com.ddgold.vo.SalesMstVO">
 		update sales_mst 
 		<set>
-			<if test="salesDt != null and salesDt != ''">
+			<if test="salesDt != null">
 				sales_dt = #{salesDt}
 			</if>
 			<if test="prdPrice != null and prdPrice != '' and prdPrice != '0'">
-				prd_price = #{prdPrice}
+				,prd_price = #{prdPrice}
 			</if>
 			<if test="salePrice != null and salePrice != '' and salePrice != '0'">
-				sale_price = #{salePrice}
+				,sale_price = #{salePrice}
 			</if>
 			<if test="description != null and description != ''">
-				description = #{description}
+				,description = #{description}
 			</if>
+			<choose>
+				<when test="paymentCardDtl != null and paymentCardDtl != ''">
+					,payment_card_dtl = #{paymentCardDtl}
+				</when>
+				<otherwise>
+					,payment_card_dtl = 0
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="paymentTransferDtl != null and paymentTransferDtl != ''">
+					,payment_transfer_dtl = #{paymentTransferDtl}
+				</when>
+				<otherwise>
+					,payment_transfer_dtl = 0
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="paymentCashDtl != null and paymentCashDtl != ''">
+					,payment_cash_dtl = #{paymentCashDtl}
+				</when>
+				<otherwise>
+					,payment_cash_dtl = 0
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="paymentGoldDtl != null and paymentGoldDtl != ''">
+					,payment_gold_dtl = #{paymentGoldDtl}
+				</when>
+				<otherwise>
+					,payment_gold_dtl = 0
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="paymentGoodsDtl != null and paymentGoodsDtl != ''">
+					,payment_goods_dtl = #{paymentGoodsDtl}
+				</when>
+				<otherwise>
+					,payment_goods_dtl = 0
+				</otherwise>
+			</choose>
 		</set>
 		where 
 			sales_seq=#{salesSeq}

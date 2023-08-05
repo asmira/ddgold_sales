@@ -14,6 +14,6 @@ public interface SalesService {
 	List<RemainVO> getSalesRemainList();
 	
 	int insertSales(SalesVO po);
-	
+	public int updateSales(SalesVO po);
 	int deleteSales(int salesSeq);
 }
