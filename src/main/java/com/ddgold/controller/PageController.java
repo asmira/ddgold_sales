@@ -140,6 +140,7 @@ public class PageController {
 		mv.addObject("salesTypes", filterSpecificCode(cvoAll, "sales_type"));
 		mv.addObject("karatages", filterSpecificCode(cvoAll, "karatage"));
 		mv.addObject("prdTypes", filterSpecificCode(cvoAll, "prd_type"));
+		mv.addObject("colors", filterSpecificCode(cvoAll, "color"));
 		
 		mv.addObject("title","A/S대장");
 		mv.addObject("salesParam",param);

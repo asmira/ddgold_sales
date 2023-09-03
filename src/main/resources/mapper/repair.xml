@@ -3,26 +3,63 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
         
 <mapper namespace="com.ddgold.dao.RepairDao">
-    <select id="selectRepairList" parameterType="com.ddgold.vo.SalesParamVO">
+	<resultMap id="repairMap" type="com.ddgold.vo.RepairVO">
+	    <id property="repairSeq" column="repair_seq"/>
+	    <result property="repairMobile" column="repair_mobile"/>
+	    <result property="repairName" column="repair_name"/>
+	    <result property="repairDate" column="repair_date"/>
+	    <result property="repairDesc" column="repair_desc"/>
+	    <result property="repairDesc2" column="repair_desc2"/>
+	    <result property="repairDesc3" column="repair_desc3"/>
+	    <result property="repairDesc4" column="repair_desc4"/>
+	    <result property="repairDesc5" column="repair_desc5"/>
+	    <result property="hasOrder" column="has_order"/>
+	    <collection property="repairDtlList" ofType="com.ddgold.vo.RepairDtlVO">
+	    	<id property="repairDtlSeq" column="repair_seq"/>
+	    	<result property="repairSeq" column="repair_seq"/>
+		    <result property="prdType" column="prd_type"/>
+   		    <result property="prdTypeStr" column="prd_type_str"/>
+		    <result property="karatage" column="karatage"/>
+		    <result property="karatageStr" column="karatage_str"/>
+		    <result property="color" column="color"/>
+		    <result property="colorStr" column="color_str"/>
+		    <result property="receiptDate" column="receipt_date"/>
+		    <result property="finishDate" column="finish_date"/>
+		    <result property="finishStatus" column="finish_status"/>
+		    <result property="paymentCardDtl" column="payment_card_dtl"/>
+		    <result property="paymentTransferDtl" column="payment_transfer_dtl"/>
+		    <result property="paymentCashDtl" column="payment_cash_dtl"/>
+	    </collection>
+	</resultMap>
+
+    <select id="selectRepairList" parameterType="com.ddgold.vo.SalesParamVO" resultMap="repairMap">
         SELECT 
-            repair_seq,
-            repair_mobile,
-            repair_name,
-            prd_type,
-            (select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
-            karatage,
-            (select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
-            repair_desc,
-            repair_price,
-            payment_card_dtl,
-            payment_transfer_dtl,
-            payment_cash_dtl,
-            repair_date,
-            receipt_date,
-            finish_date
-        FROM repair_mng m
+            m.repair_seq,
+            m.repair_mobile,
+            m.repair_name,
+            m.repair_desc,
+            m.repair_desc2,
+            m.repair_desc3,
+            m.repair_desc4,
+            m.repair_desc5,
+            m.repair_date,
+            m.has_order,
+            d.repair_price,
+            d.payment_card_dtl,
+            d.payment_transfer_dtl,
+            d.payment_cash_dtl,
+            d.prd_type,
+            (select code_desc from code_dtl where code_grp='prd_type' and code_val=d.prd_type) prd_type_str,
+            d.karatage,
+            (select code_desc from code_dtl where code_grp='karatage' and code_val=d.karatage) karatage_str,
+            d.color,
+            (select code_desc from code_dtl where code_grp='color' and code_val=d.color) color_str,
+            d.receipt_date,
+            d.finish_date,
+            d.finish_status
+        FROM repair_mng m, repair_dtl d
         <where>
-			1=1
+			m.repair_seq = d.repair_seq
 			<if test="month != null and month != ''">
 				and m.repair_date like concat(#{year}, '-', #{month}, '%')
 			</if>
@@ -48,25 +85,35 @@
 		</choose>
     </select>
 
-    <select id="selectRepair" parameterType="integer">
+    <select id="selectRepair" parameterType="integer" resultMap="repairMap">
         SELECT 
-            repair_seq,
-            repair_mobile,
-            repair_name,
-            prd_type,
-            (select code_desc from code_dtl where code_grp='prd_type' and code_val=prd_type) prd_type_str,
-            karatage,
-            (select code_desc from code_dtl where code_grp='karatage' and code_val=karatage) karatage_str,
-            repair_desc,
-            repair_price,
-            payment_card_dtl,
-            payment_transfer_dtl,
-            payment_cash_dtl,
-            repair_date,
-            receipt_date,
-            finish_date
-        FROM repair_mng
-        where repair_seq = #{repairSeq}
+            m.repair_seq,
+            m.repair_mobile,
+            m.repair_name,
+            m.repair_desc,
+            m.repair_desc2,
+            m.repair_desc3,
+            m.repair_desc4,
+            m.repair_desc5,
+            m.repair_date,
+            m.has_order,
+            d.repair_price,
+            d.payment_card_dtl,
+            d.payment_transfer_dtl,
+            d.payment_cash_dtl,
+            d.prd_type,
+            (select code_desc from code_dtl where code_grp='prd_type' and code_val=d.prd_type) prd_type_str,
+            d.karatage,
+            (select code_desc from code_dtl where code_grp='karatage' and code_val=d.karatage) karatage_str,
+            d.color,
+            (select code_desc from code_dtl where code_grp='color' and code_val=d.color) color_str,
+            d.receipt_date,
+            d.finish_date,
+            d.finish_status
+        FROM repair_mng m, repair_dtl d
+        where
+			m.repair_seq = d.repair_seq
+        and m.repair_seq = #{repairSeq}
     </select>
 
     <insert id="insertRepair" parameterType="com.ddgold.vo.RepairVO">
@@ -77,10 +124,10 @@
             prd_type,
             karatage,
             repair_desc,
-            repair_price,
-            payment_card_dtl,
-            payment_transfer_dtl,
-            payment_cash_dtl,
+            repair_desc2,
+            repair_desc3,
+            repair_desc4,
+            repair_desc5,
             repair_date
         ) values (
             #{repairSeq},
@@ -89,14 +136,45 @@
             #{prdType},
             #{karatage},
             #{repairDesc},
-            #{repairPrice},
-            #{paymentCardDtl},
-            #{paymentTransferDtl},
-            #{paymentCashDtl},
+            #{repairDesc2},
+            #{repairDesc3},
+            #{repairDesc4},
+            #{repairDesc5},
             #{repairDate}
         )
     </insert>
+    
+    <insert id="insertRepairDtl" parameterType="com.ddgold.vo.RepairDtlVO">
+		insert into repair_dtl (
+			repair_seq,
+			prd_type,
+            karatage,
+            color
+		) values (
+			#{repairSeq},
+			#{prdType},
+			#{karatage},
+			#{color}
+		)
+    </insert>
 
+    <update id="updateReciept" parameterType="com.ddgold.vo.RepairDtlVO">
+		update repair_dtl set
+			receipt_date = #{receiptDate}
+		where repair_dtl_seq = #{repairDtlSeq}
+    </update>
+    
+    <update id="updateFinish" parameterType="com.ddgold.vo.RepairDtlVO">
+		update repair_dtl set
+			finish_date = #{finishDate}
+			repair_price = #{repairPrice}
+			payment_card_dtl = #{paymentCardDtl},
+            payment_transfer_dtl = #{paymentTransferDtl},
+            payment_cash_dtl = #{paymentCashDtl},
+            finish_status = #{finish_status}
+		where repair_dtl_seq = #{repairDtlSeq}
+    </update>
+    
     <update id="updateRepair" parameterType="com.ddgold.vo.RepairVO">
     </update>
 

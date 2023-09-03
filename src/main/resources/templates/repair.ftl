@@ -70,9 +70,10 @@
       <th class="col-1">입고일</th>
       <th class="col-1">고객명</th>
       <th style="width:12%">연락처</th>
+      <th>수리내용</th>
       <th class="col-1">순도</th> 
       <th class="col-1">제품</th>
-      <th>수리내용</th>
+      <th class="col-1">색상</th> 
       <th class="col-1">출고일</th>
       <th class="col-1">반납일</th>
     </thead>
@@ -84,6 +85,7 @@
   $(document).ready(function(){
     initPage();
     getList();
+    deleteRepair();
   });
 
   let initParam = {};
@@ -95,8 +97,6 @@
 		const dts = list.map(l => l.repairDt);
 		const dtSet = new Set(dtlist);
 		const dtList = [...dtSet];
-		
-		
 	}
 						
 	function initPage() {
@@ -116,30 +116,57 @@
 		drawTable(currentList);
     });
   }
+  
+  function deleteRepair() {
+	$("#repairTable").on("dblclick",".repairRow",function(e){
+		openConfirm(
+			"A/S 대장삭제", 
+			"A/S내역을을 삭제 하시겠습니까?",
+			function() {
+				console.log({goldSeq:$(e.target).parent().data('seq')})
+				$.ajax({
+					url: "/api/deleteRepair/"+$(e.target).parent().data('seq'), 
+					contentType: "application/json;charset=UTF-8",
+					method: "POST",
+					dataType: "json",
+					success: function(res) {
+						getList();
+						alert('삭제되었습니다.');
+					}, fail: function(res) {
+						alert('삭제중 오류가 발생하였습니다.');
+					}
+				})
+			}
+		);
+	});
+}
 
   function drawTable(arr){
     const nf = Intl.NumberFormat()
 	let html = "";
     $(arr)?.each((idx,data) => {
 		console.log(data,idx);
-		html+="<tr>";
-		html+="	<td>"+data.repairSeq+"</td>";
-		html+="	<td>"+data.repairDate+"</td>";
-		html+="	<td>"+data.repairName+"</td>";
-		html+="	<td>"+data.repairMobile+"</td>";
-		html+="	<td>"+data.karatageStr+"</td>";
-		html+="	<td>"+data.prdTypeStr+"</td>";
-		html+="	<td>"+data.repairDesc+"</td>";
-		if(data.receiptDate) {
-			html+="	<td>"+data.receiptDate+"</td>";
-		} else {
-			html+="	<td class='text-center'><button type='button'>출고접수</button></td>";
-		}
-		if(data.receiptDate) {
-			html+="	<td>"+data.finishDate+"</td>";
-		} else {
-			html+="	<td class='text-center'><button type='button'>반납처리</button></td>";
-		}
+		html+="<tr class='repairRow' data-seq='"+data.repairSeq+"'>";
+		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairSeq+"</td>";
+		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairDate+"</td>";
+		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairName+"</td>";
+		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairMobile+"</td>";
+		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairDesc+"</td>";
+		$(data.repairDtlList)?.each((idx,dtl) => {
+			html+="	<td>"+(dtl.karatageStr?dtl.karatageStr:'')+"</td>";
+			html+="	<td>"+(dtl.prdTypeStr?dtl.prdTypeStr:'')+"</td>";
+			html+="	<td>"+(dtl.colorStr?dtl.colorStr:'')+"</td>";
+			if(data.receiptDate) {
+				html+="	<td>"+dtl.receiptDate+"</td>";
+			} else {
+				html+="	<td class='text-center'><button type='button'>출고접수</button></td>";
+			}
+			if(data.receiptDate) {
+				html+="	<td>"+data.finishDate+"</td>";
+			} else {
+				html+="	<td class='text-center'><button type='button'>반납처리</button></td>";
+			}
+		});
 		html+="</tr>";
     });
 	$("#repairTable tbody").html(html)

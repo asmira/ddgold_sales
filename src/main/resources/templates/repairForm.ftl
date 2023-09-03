@@ -25,24 +25,39 @@
 				<input id="repairMobile" name="repairMobile" type="text" autocomplete="one-time-code" class="form-control"/>
 			</div>
 			<div class="form-group mb-3">
-				<label for="karatageStr1" style="margin-left:8px;">순도</label>
-				<select class="form-select" name="karatage" id="karatageStr1">
-					<#list karatages as karatage>
-						<option value="${karatage.codeVal}">${karatage.codeDesc}</option>
-					</#list>
-				</select>
-			</div>
-			<div class="form-group mb-3">
-				<label for="prdTypeStr1" style="margin-left:8px;">제품</label>
-				<select class="form-select" name="prdType" id="prdTypeStr1">
-					<#list prdTypes as prdType>
-						<option value="${prdType.codeVal}">${prdType.codeDesc}</option>
-					</#list>
-				</select>
-			</div>
-			<div class="form-group mb-3">
 				<label for="repairDesc">수리내역</label>
 				<textarea id="repairDesc" name="repairDesc" type="text" autocomplete="one-time-code" class="form-control"></textarea>
+			</div>
+			<div class="form-group row prdRow">
+				<div>
+					<label for="salesTypeSel">제품등록</label>
+					<span style="margin-left:5px;"><button type="button" class="btn btn-sm btn-secondary" id="prdAdd">추가</button></span>
+					<span style="margin-left:5px;"><button type="button" class="btn btn-sm btn-secondary" id="prdRemove">삭제</button></span>
+				</div>
+				<div class="col-4 form-floating">
+				    <select class="form-select" name="karatage" id="karatageStr1">
+				    	<#list karatages as karatage>
+				    		<option value="${karatage.codeVal}">${karatage.codeDesc}</option>
+				    	</#list>
+				    </select>
+				    <label for="karatageStr1" style="margin-left:8px;">금순도</label>
+		    	</div>
+				<div class="form-floating col-4">
+					<select class="form-select" name="prdType" id="prdTypeStr1">
+						<#list prdTypes as prdType>
+							<option value="${prdType.codeVal}">${prdType.codeDesc}</option>
+						</#list>
+					</select>
+					<label for="prdTypeStr1" style="margin-left:8px;">제품</label>
+				</div>
+				<div class="form-floating col-4">
+					<select class="form-select" name="color" id="colorStr1">
+						<#list colors as color>
+							<option value="${color.codeVal}">${color.codeDesc}</option>
+						</#list>
+					</select>
+					<label for="prdTypeStr1" style="margin-left:8px;">색상</label>
+				</div>
 			</div>
 		</form>
 	  </div>
