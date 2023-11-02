@@ -30,32 +30,7 @@
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">
-		    	<div class="col-2">
-					<select class="form-select" name="year">
-				    	<option value="2023">2023년</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="month">
-				    	<option value="01">1월</option>
-				    	<option value="02">2월</option>
-				    	<option value="03">3월</option>
-				    	<option value="04">4월</option>
-				    	<option value="05">5월</option>
-				    	<option value="06">6월</option>
-				    	<option value="07">7월</option>
-				    	<option value="08">8월</option>
-				    	<option value="09">9월</option>
-				    	<option value="10">10월</option>
-				    	<option value="11">11월</option>
-				    	<option value="12">12월</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="dt">
-				    	<option value="">전체</option>
-				    </select>
-		    	</div>
+		    	<#include "./layout/dateSelector.ftl">
 		    	<div class="col">
 		    		<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#repairModal">수리 등록</button>
 		    	</div>
@@ -67,30 +42,53 @@
 <table class="table table-bordered" id="repairTable">
     <thead class="text-center">
       <th style="width:5%">연번</th>
-      <th class="col-1">입고일</th>
+      <th class="col-1">접수일</th>
       <th class="col-1">고객명</th>
       <th style="width:12%">연락처</th>
       <th>수리내용</th>
-      <th class="col-1">순도</th> 
+      <th class="col-1">순도</th>
       <th class="col-1">제품</th>
-      <th class="col-1">색상</th> 
+      <th class="col-1">색상</th>
+      <th class="col-1">수리완료일</th>
       <th class="col-1">출고일</th>
-      <th class="col-1">반납일</th>
     </thead>
     <tbody>
     </tbody>
 </table>
+
 <#include "./repairForm.ftl">
+<#include "./repairReceiptForm.ftl">
+
 <script type="text/javascript">
   $(document).ready(function(){
     initPage();
     getList();
     deleteRepair();
+    
+	$("#repairTable").on("dblclick",".receiptTd", function(e) {
+		if(confirm('수리완료를 취소하시겠습니까?')) {
+			$.ajax({
+				url: "/api/cancelReceipt", 
+				data: JSON.stringify({repairDtlSeq: $(e.target).data('receiptSeq')}),
+				contentType: "application/json;charset=UTF-8",
+				method: "POST",
+				dataType: "json",
+				success: function(res) {
+					getList();
+				}
+			});
+		}
+	});
+	
+	$("#repairTable").on("click",".receiptBtn", function(e) {
+		console.log($(e.target).data('receiptSeq'));
+		$name('repairDtlSeq',$('#receiptModal')).val($(e.target).data('receiptSeq'));
+	});
   });
 
   let initParam = {};
-		initParam.year = '${salesParam.year}';
-		initParam.month = '${salesParam.month}';
+	initParam.year = '${salesParam.year}';
+	initParam.month = '${salesParam.month}';
 
 	function makeDt(list) {
 		const $sel = $("[name=dt]");
@@ -99,20 +97,22 @@
 		const dtList = [...dtSet];
 	}
 						
-	function initPage() {
-		const selects = ['year','month'];
-		for(const sel of selects) {
-			$("select[name="+sel+"]").val(initParam[sel]);
-			$("[name=searchForm] select[name="+sel+"]").on('change',function(e){
-				getList();
-			});
-		}
-	}
+	function initPage() {}
 
   function getList() {
-    $.get("/api/repairList", function(res) {
+  	const year = $("select[name=year]").val();
+	const month = $("select[name=month]").val();
+	
+	const paramDt = {};
+	if(!!year) {
+		paramDt.year = year;
+		if(!!month){
+			paramDt.month = month;
+		} 
+	}
+	
+    $.get("/api/repairList",paramDt, function(res) {
 		const currentList = JSON.parse(res);
-		console.log(currentList)
 		drawTable(currentList);
     });
   }
@@ -145,33 +145,32 @@
     const nf = Intl.NumberFormat()
 	let html = "";
     $(arr)?.each((idx,data) => {
-		console.log(data,idx);
 		html+="<tr class='repairRow' data-seq='"+data.repairSeq+"'>";
-		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairSeq+"</td>";
-		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairDate+"</td>";
-		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairName+"</td>";
-		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairMobile+"</td>";
-		html+="	<td"+(data.repairDtlList?" colspan='"+data.repairDtlList.length+"'":"")+">"+data.repairDesc+"</td>";
+		html+="	<td"+(data.repairDtlList?" rowspan='"+data.repairDtlList.length+"'":"")+">"+data.repairSeq+"</td>";
+		html+="	<td"+(data.repairDtlList?" rowspan='"+data.repairDtlList.length+"'":"")+">"+data.repairDate+"</td>";
+		html+="	<td"+(data.repairDtlList?" rowspan='"+data.repairDtlList.length+"'":"")+">"+data.repairName+"</td>";
+		html+="	<td"+(data.repairDtlList?" rowspan='"+data.repairDtlList.length+"'":"")+">"+data.repairMobile+"</td>";
+		html+="	<td"+(data.repairDtlList?" rowspan='"+data.repairDtlList.length+"'":"")+"><pre>"+data.repairDesc+"</pre></td>";
 		$(data.repairDtlList)?.each((idx,dtl) => {
+			if(idx > 0) html+="<tr>";
+			
 			html+="	<td>"+(dtl.karatageStr?dtl.karatageStr:'')+"</td>";
 			html+="	<td>"+(dtl.prdTypeStr?dtl.prdTypeStr:'')+"</td>";
 			html+="	<td>"+(dtl.colorStr?dtl.colorStr:'')+"</td>";
-			if(data.receiptDate) {
-				html+="	<td>"+dtl.receiptDate+"</td>";
+			if(dtl.receiptDate) {
+				html+="	<td class='receiptTd' data-receipt-seq="+dtl.repairDtlSeq+">"+dtl.receiptDate+"</td>";
 			} else {
-				html+="	<td class='text-center'><button type='button'>출고접수</button></td>";
+				html+="	<td class='text-center'><button type='button' class='receiptBtn' data-bs-toggle='modal' data-bs-target='#receiptModal' data-receipt-seq="+dtl.repairDtlSeq+">수리완료</button></td>";
 			}
 			if(data.receiptDate) {
 				html+="	<td>"+data.finishDate+"</td>";
 			} else {
-				html+="	<td class='text-center'><button type='button'>반납처리</button></td>";
+				html+="	<td class='text-center'><button type='button'>출고처리</button></td>";
 			}
+			if(idx > 0)  html+="</tr>";
 		});
 		html+="</tr>";
     });
 	$("#repairTable tbody").html(html)
-
   }
-
-  
 </script>

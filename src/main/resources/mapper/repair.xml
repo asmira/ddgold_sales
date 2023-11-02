@@ -14,8 +14,8 @@
 	    <result property="repairDesc4" column="repair_desc4"/>
 	    <result property="repairDesc5" column="repair_desc5"/>
 	    <result property="hasOrder" column="has_order"/>
-	    <collection property="repairDtlList" ofType="com.ddgold.vo.RepairDtlVO">
-	    	<id property="repairDtlSeq" column="repair_seq"/>
+	    <collection property="repairDtlList" ofType="com.ddgold.vo.RepairDtlVO" column="repair_seq">
+	    	<id property="repairDtlSeq" column="repair_dtl_seq"/>
 	    	<result property="repairSeq" column="repair_seq"/>
 		    <result property="prdType" column="prd_type"/>
    		    <result property="prdTypeStr" column="prd_type_str"/>
@@ -44,6 +44,7 @@
             m.repair_desc5,
             m.repair_date,
             m.has_order,
+            d.repair_dtl_seq,
             d.repair_price,
             d.payment_card_dtl,
             d.payment_transfer_dtl,
@@ -97,6 +98,7 @@
             m.repair_desc5,
             m.repair_date,
             m.has_order,
+            d.repair_dtl_seq,
             d.repair_price,
             d.payment_card_dtl,
             d.payment_transfer_dtl,
@@ -121,8 +123,6 @@
             repair_seq,
             repair_mobile,
             repair_name,
-            prd_type,
-            karatage,
             repair_desc,
             repair_desc2,
             repair_desc3,
@@ -133,8 +133,6 @@
             #{repairSeq},
             #{repairMobile},
             #{repairName},
-            #{prdType},
-            #{karatage},
             #{repairDesc},
             #{repairDesc2},
             #{repairDesc3},
@@ -142,6 +140,9 @@
             #{repairDesc5},
             #{repairDate}
         )
+        <selectKey order="AFTER" resultType="int" keyProperty="repairSeq">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
     </insert>
     
     <insert id="insertRepairDtl" parameterType="com.ddgold.vo.RepairDtlVO">
@@ -176,9 +177,33 @@
     </update>
     
     <update id="updateRepair" parameterType="com.ddgold.vo.RepairVO">
+    	update repair_mng set 
+	        repair_mobile = #{repairMobile},
+	        repair_name = #{repairName},
+	        repair_desc = #{repairDesc},
+	        repair_desc2 = #{repairDesc2},
+	        repair_desc3 = #{repairDesc3},
+	        repair_desc4 = #{repairDesc4},
+	        repair_desc5 = #{repairDesc5},
+	        repair_date = #{repairDate}
+		where	    	
+	    	repair_seq = #{repair_seq}
     </update>
+
+	<update id="updateRepairDtl" parameterType="com.ddgold.vo.RepairDtlVO">
+		update repair_dtl set
+			prd_type = #{prdType},
+            karatage = #{karatage},
+            color = #{color}
+        where
+        	repair_dtl_seq = #{repair_dtl_seq}
+	</update>
 
     <delete id="deleteRepair" parameterType="integer">
         delete from repair_mng where repair_seq = #{repairSeq}
+    </delete>
+    
+    <delete id="deleteRepairDtl" parameterType="integer">
+    	delete from repair_dtl where repair_seq = #{repairSeq}
     </delete>
 </mapper>

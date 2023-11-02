@@ -25,21 +25,19 @@ public class CashController {
 	@ResponseBody
 	@GetMapping("/api/cashList")
 	public String cashListJson(SalesParamVO po) {
-		System.out.println(po);
 		List<CashOnHandVO> list = cashService.getCashOnHandList(po);
-		System.out.println(list);
+
 		Gson gson = new GsonBuilder()
 					.serializeNulls()
 					.setDateFormat("yyyy-MM-dd")
 					.create();
+		
 		return gson.toJson(list);
 	}
 	
 	@ResponseBody
 	@PostMapping( consumes = "application/json", value = "/api/insertCashOnHand")
 	public String insertCashOnHAnd(@RequestBody CashOnHandVO vo) {
-		System.out.println(vo);
-		
 		cashService.insertCashOnHand(vo);
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -52,8 +50,6 @@ public class CashController {
 	@ResponseBody
 	@PostMapping( value = "/api/deleteCashOnHand")
 	public String deleteCashOnHAnd(@RequestBody CashOnHandVO vo) {
-		System.out.println(vo);
-		
 		cashService.deleteCashOnHand(vo);
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -67,8 +63,6 @@ public class CashController {
 	@ResponseBody
 	@PostMapping("/api/closeCashOnHand")
 	public String closeCashOnHAnd(SalesParamVO po) {
-		System.out.println(po);
-		
 		cashService.insertLastCashOnHand();
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -86,8 +80,6 @@ public class CashController {
 	@ResponseBody
 	@PostMapping("/api/cancleCloseCashOnHand")
 	public String cancelCloseCashOnHAnd(SalesParamVO po) {
-		System.out.println(po);
-		
 		int deleted = cashService.deleteLastCashOnHand();
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -104,6 +96,4 @@ public class CashController {
 		
 		return gson.toJson(result);
 	}
-	
-	
 }

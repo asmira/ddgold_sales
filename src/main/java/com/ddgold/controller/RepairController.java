@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ddgold.service.RepairService;
+import com.ddgold.vo.RepairDtlVO;
 import com.ddgold.vo.RepairVO;
 import com.ddgold.vo.SalesParamVO;
 import com.google.gson.Gson;
@@ -77,7 +78,19 @@ public class RepairController {
 		Gson gson = new Gson();
 		return gson.toJson(result);
 	}
-
+	
+	@ResponseBody
+    @PostMapping( value = {"/api/updateReceipt", "/api/cancelReceipt"})
+    public String updateReceipt(@RequestBody RepairDtlVO vo) {
+        repairService.receiptRepair(vo);
+        
+        HashMap<String, String> result = new HashMap<>();
+        result.put("result", "success");
+        
+        Gson gson = new Gson();
+        return gson.toJson(result);
+    }
+	
 	@ResponseBody
 	@PostMapping( value = "/api/deleteRepair/{repairSeq}")
 	public String deleteCashOnHAnd(@PathVariable int repairSeq) {

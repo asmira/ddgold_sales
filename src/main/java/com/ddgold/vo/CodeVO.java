@@ -1,10 +1,12 @@
 package com.ddgold.vo;
 
 public class CodeVO {
+  
 	private int codeSeq;
 	private String codeGrp;
 	private String codeVal;
 	private String codeDesc;
+	
 	public int getCodeSeq() {
 		return codeSeq;
 	}
@@ -29,6 +31,7 @@ public class CodeVO {
 	public void setCodeDesc(String codeDesc) {
 		this.codeDesc = codeDesc;
 	}
+	
 	@Override
 	public String toString() {
 		return "CodeVO [codeSeq=" + codeSeq + ", codeGrp=" + codeGrp + ", codeVal=" + codeVal + ", codeDesc=" + codeDesc

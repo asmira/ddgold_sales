@@ -27,32 +27,7 @@
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">
-		    	<div class="col-2">
-					<select class="form-select" name="year">
-				    	<option value="2023">2023년</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="month">
-				    	<option value="01">1월</option>
-				    	<option value="02">2월</option>
-				    	<option value="03">3월</option>
-				    	<option value="04">4월</option>
-				    	<option value="05">5월</option>
-				    	<option value="06">6월</option>
-				    	<option value="07">7월</option>
-				    	<option value="08">8월</option>
-				    	<option value="09">9월</option>
-				    	<option value="10">10월</option>
-				    	<option value="11">11월</option>
-				    	<option value="12">12월</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="dt">
-				    	<option value="">전체</option>
-				    </select>
-		    	</div>
+		    	<#include "./layout/dateSelector.ftl">
 		    	<div class="col-2">
 		    		<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#goldModal">고금 등록</button>
 		    	</div>
@@ -106,16 +81,7 @@
 		const dtList = [...dtSet];
 	}
 						
-	function initPage() {
-		
-		const selects = ['year','month'];
-		for(const sel of selects) {
-			$("select[name="+sel+"]").val(initParam[sel]);
-			$("[name=searchForm] select[name="+sel+"]").on('change',function(e){
-				getList();
-			});
-		}
-	}
+	function initPage() {}
 	
 	function deleteGold() {
 		$("#gold").on("dblclick",".goldRow",function(e){
@@ -143,7 +109,18 @@
 	}
 			
 	function getList(callback) {
-		$.get("/api/goldList", function(res) {
+		const year = $("select[name=year]").val();
+		const month = $("select[name=month]").val();
+		
+		const paramDt = {};
+		if(!!year) {
+			paramDt.year = year;
+			if(!!month){
+				paramDt.month = month;
+			} 
+		}
+
+		$.get("/api/goldList", paramDt, function(res) {
 			currentList = JSON.parse(res);
 			makeDt(currentList);
 			drawList(currentList);

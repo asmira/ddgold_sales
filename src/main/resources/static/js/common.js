@@ -7,6 +7,16 @@ const yesterday = getDateStr(new Date(new Date().setDate(new Date().getDate()-1)
 
 const weeksago = getDateStr(new Date(new Date().setDate(new Date().getDate()-7)));
 
+const lastDateOfMonth = function(){
+	const dt = new Date();
+	dt.setMonth(dt.getMonth()+1);
+	dt.setDate(1);
+	
+	dt.setDate(dt.getDate()-1);
+	
+	return dt.getDate(); 
+}();
+
 function getDateStr(dt) {
 	return dt.getFullYear() + "-" + ((dt.getMonth() +1)+'').padStart(2,'0') + "-" +  (dt.getDate()+'').padStart(2,0)
 }

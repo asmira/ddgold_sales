@@ -12,7 +12,7 @@ public class RepairVO {
 	private String repairDesc3;
 	private String repairDesc4;
 	private String repairDesc5;
-	private Date repairDate;
+	private Date repairDate; //접수일
 	private Date receiptDate;
 	private Date finishDate;
 	private String hasOrder;

@@ -25,32 +25,7 @@
 		<form name="searchForm">
 			<input type="hidden" name="ordDirection" value="${salesParam.ordDirection!''}"/>
 			<div class="row">
-		    	<div class="col-2">
-					<select class="form-select" name="year">
-				    	<option value="2023">2023년</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="month">
-				    	<option value="01">1월</option>
-				    	<option value="02">2월</option>
-				    	<option value="03">3월</option>
-				    	<option value="04">4월</option>
-				    	<option value="05">5월</option>
-				    	<option value="06">6월</option>
-				    	<option value="07">7월</option>
-				    	<option value="08">8월</option>
-				    	<option value="09">9월</option>
-				    	<option value="10">10월</option>
-				    	<option value="11">11월</option>
-				    	<option value="12">12월</option>
-				    </select>
-		    	</div>
-		    	<div class="col-1">
-				    <select class="form-select" name="dt">
-				    	<option value="">전체</option>
-				    </select>
-		    	</div>
+		    	<#include "./layout/dateSelector.ftl">
 		    	<div class="col">
 		    		<button type="button" class="btn btn-secondary" id="closeCashOnHand">마감</button>
 		    		<button type="button" class="btn btn-secondary" id="cancelCloseCashOnHand">마감취소</button>
@@ -92,7 +67,6 @@
 				"시재삭제", 
 				"시재를 삭제 하시겠습니까?",
 				function() {
-					console.log({cashSeq:$(e.target).parent().data('seq')})
 					$.ajax({
 						url: "/api/deleteCashOnHand", 
 						data: JSON.stringify({cashSeq:$(e.target).parent().data('seq')}),
@@ -145,30 +119,32 @@
 		const dts = list.map(l => l.cashDt);
 		const dtSet = new Set(dtlist);
 		const dtList = [...dtSet];
-		
-		
 	}
 						
 	function initPage() {
-		const selects = ['year','month'];
-		for(const sel of selects) {
-			$("select[name="+sel+"]").val(initParam[sel]);
-			$("[name=searchForm] select[name="+sel+"]").on('change',function(e){
-				getList();
-			});
-		}
 	}
 	
 	function getList(callback) {
-		$.get("/api/cashList", function(res) {
+		const year = $("select[name=year]").val();
+		const month = $("select[name=month]").val();
+
+		let paramDt = {};
+		if(!!year) {
+			paramDt.year = year;
+			if(!!month){
+				paramDt.month = month;
+			} 
+		}
+
+		$.get("/api/cashList", paramDt, function(res) {
 			currentList = JSON.parse(res);
 			var nf = Intl.NumberFormat()
 			let prevDt="";
 			let html = "";
-			
+
 			for(const l of currentList) {
 				let prevExpense = 0, prevIncome = 0;
-				
+
 				if(!!prevDt && l.cashDt != prevDt) {
 					let prevList = currentList.filter(c => c.cashDt == prevDt);
 					
