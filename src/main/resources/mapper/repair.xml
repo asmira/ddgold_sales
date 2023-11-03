@@ -120,7 +120,6 @@
 
     <insert id="insertRepair" parameterType="com.ddgold.vo.RepairVO">
         insert into repair_mng (
-            repair_seq,
             repair_mobile,
             repair_name,
             repair_desc,
@@ -130,7 +129,6 @@
             repair_desc5,
             repair_date
         ) values (
-            #{repairSeq},
             #{repairMobile},
             #{repairName},
             #{repairDesc},
@@ -167,12 +165,19 @@
     
     <update id="updateFinish" parameterType="com.ddgold.vo.RepairDtlVO">
 		update repair_dtl set
-			finish_date = #{finishDate}
-			repair_price = #{repairPrice}
+			finish_date = #{finishDate},
+			repair_price = #{repairPrice},
 			payment_card_dtl = #{paymentCardDtl},
             payment_transfer_dtl = #{paymentTransferDtl},
             payment_cash_dtl = #{paymentCashDtl},
-            finish_status = #{finish_status}
+            finish_status = 'F'
+		where repair_dtl_seq = #{repairDtlSeq}
+    </update>
+
+    <update id="updateRestock" parameterType="com.ddgold.vo.RepairDtlVO">
+		update repair_dtl set
+            finish_status = 'R',
+            finish_date = #{finishDate}
 		where repair_dtl_seq = #{repairDtlSeq}
     </update>
     

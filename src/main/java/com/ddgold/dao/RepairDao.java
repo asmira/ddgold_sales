@@ -23,6 +23,8 @@ public interface RepairDao {
     int updateReciept(RepairDtlVO po);
     
     int updateFinish(RepairDtlVO po);
+
+    int updateRestock(RepairDtlVO po);
     
     int deleteRepair(int repairSeq);
     

@@ -20,4 +20,6 @@ public interface RepairService {
     public int finishRepair(RepairDtlVO po);
 
     public int deleteRepair(int repairSeq);
+
+    int restockRepair(RepairDtlVO po);
 }

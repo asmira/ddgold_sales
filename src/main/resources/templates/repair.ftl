@@ -58,6 +58,7 @@
 
 <#include "./repairForm.ftl">
 <#include "./repairReceiptForm.ftl">
+<#include "./repairFinishForm.ftl">
 
 <script type="text/javascript">
   $(document).ready(function(){
@@ -83,6 +84,12 @@
 	$("#repairTable").on("click",".receiptBtn", function(e) {
 		console.log($(e.target).data('receiptSeq'));
 		$name('repairDtlSeq',$('#receiptModal')).val($(e.target).data('receiptSeq'));
+	});
+
+	$("#repairTable").on("click",".finishBtn", function(e) {
+		console.log($(e.target).data('receiptSeq'));
+		$name('repairDtlSeq',$('#finishModal')).val($(e.target).data('finishSeq'));
+		$name('repairSeq',$('#finishModal')).val($(e.target).data('repairSeq'));
 	});
   });
 
@@ -160,12 +167,14 @@
 			if(dtl.receiptDate) {
 				html+="	<td class='receiptTd' data-receipt-seq="+dtl.repairDtlSeq+">"+dtl.receiptDate+"</td>";
 			} else {
-				html+="	<td class='text-center'><button type='button' class='receiptBtn' data-bs-toggle='modal' data-bs-target='#receiptModal' data-receipt-seq="+dtl.repairDtlSeq+">수리완료</button></td>";
+				html+="	<td class='text-center'><button type='button' class='receiptBtn' data-bs-toggle='modal' data-bs-target='#receiptModal' data-receipt-seq='"+dtl.repairDtlSeq+"'>수리완료</button></td>";
 			}
-			if(data.receiptDate) {
-				html+="	<td>"+data.finishDate+"</td>";
+			if(dtl.finishStatus === 'R') {
+				html+="	<td>재입고("+dtl.finishDate+")</td>";
+			} else if(dtl.finishStatus === 'F') {
+				html+="	<td>"+dtl.finishDate+"</td>";
 			} else {
-				html+="	<td class='text-center'><button type='button'>출고처리</button></td>";
+				html+="	<td class='text-center'><button type='button' class='finishBtn' data-bs-toggle='modal' data-bs-target='#finishModal' data-repair-seq='"+dtl.repairSeq+"' data-finish-seq='"+dtl.repairDtlSeq+"'>출고처리</button></td>";
 			}
 			if(idx > 0)  html+="</tr>";
 		});

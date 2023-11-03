@@ -91,6 +91,24 @@ public class RepairController {
         return gson.toJson(result);
     }
 	
+
+    @ResponseBody
+    @PostMapping( value = {"/api/updateFinish", "/api/cancelFinish"})
+    public String updateFinish(@RequestBody RepairDtlVO vo) {
+        if("R".equals(vo.getFinishStatus())) {
+          repairService.restockRepair(vo);
+        } else {
+          repairService.finishRepair(vo);
+        }
+        
+        HashMap<String, String> result = new HashMap<>();
+        result.put("result", "success");
+        
+        Gson gson = new Gson();
+        return gson.toJson(result);
+    }
+    
+	
 	@ResponseBody
 	@PostMapping( value = "/api/deleteRepair/{repairSeq}")
 	public String deleteCashOnHAnd(@PathVariable int repairSeq) {
