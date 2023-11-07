@@ -2,13 +2,14 @@ package com.ddgold.controller;
 
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ddgold.service.SalesService;
@@ -52,14 +53,19 @@ public class SalesController {
 
 	@ResponseBody
 	@GetMapping("/api/salesRemainList")
-	public String salesRemainList() {
+	public String salesRemainList(@RequestParam(required = false) String type) {
 		List<RemainVO> list = salesService.getSalesRemainList();
-		
+		List<RemainVO> filteredList = list;
+		if(!"full".equals(type)) {
+    		filteredList = list.stream().filter(r -> {
+    		  return r.getRemainAmt() != r.getRemainPaymentAmt();
+    		}).toList();
+		}
 		Gson gson = new GsonBuilder()
 					.serializeNulls()
 					.setDateFormat("yyyy-MM-dd")
 					.create();
-		return gson.toJson(list);
+		return gson.toJson(filteredList);
 	}
 	
 	@ResponseBody

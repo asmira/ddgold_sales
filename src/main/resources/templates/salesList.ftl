@@ -92,7 +92,7 @@
 <table id="sales" class="table table-bordered table-responsive-lg">
 	<thead>
         <tr class="text-center align-middle">
-        	<th >연번</th>
+        	<th>연번</th>
             <th class="col-1" id="salesDt">주문일</th>
             <th style="width:7%">주문유형</th>
             <th class="col-1">제품종류</th>
@@ -202,11 +202,11 @@
 			html += '	<td'+rowspanStr+' class="text-end">'+(s.paymentGoldDtl||0)+'</td>';
 			html += '	<td'+rowspanStr+' class="text-end">'+(s.paymentGoodsDtl||0)+'</td>';
 			html += '	<td'+rowspanStr+' class="text-end">'+
-					(s.remain && s.remain.remainSalesSeq > 0 
+					((s.remain && s.remain.remainSalesSeq > 0 &&  s.salesDtlList[0].salesType !== '6')
 						? ((s.remain.remainAmt - s.remain.remainPaymentAmt) + ((s.remain?.remainSalesDt)?'('+ s.remain.remainSalesDt +'납부)':''))
 						: s.remain?.remainAmt||0)
 			+'</td>';
-			html += '	<td'+rowspanStr+' class="text-start">'+(s.description||"")+'</td>'
+			html += '	<td'+rowspanStr+' class="text-start">'+(s.salesDtlList[0].salesType === '6'? s.remain.salesDt + ' ' + s.remain.salesSeq + '번 잔금처리<br/>':'')+(s.description||"")+'</td>'
 			html += '</tr>'
 			if(s.salesDtlList?.length > 1) {
 				for(let i=1; i<s.salesDtlList.length;i++){

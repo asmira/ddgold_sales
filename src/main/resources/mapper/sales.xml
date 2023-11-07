@@ -17,6 +17,7 @@
 	    <association property="remain" column="salesSeq" javaType="com.ddgold.vo.RemainVO">
 	    	<id property="remainSeq" column="remain_seq"/>
 	    	<result property="salesSeq" column="remain_target_seq"/>
+	    	<result property="salesDt" column="remain_target_dt"/>
 	    	<result property="remainAmt" column="remain_amt"/>
 	    	<result property="remainSalesSeq" column="remain_sales_seq"/>
 	    	<result property="remainSalesDt" column="remain_sales_dt"/>
@@ -41,7 +42,7 @@
 	</resultMap>
 	
 	<select id="selectRemainSalesList" parameterType="com.ddgold.vo.SalesParamVO">
-		select r.sales_seq, r.sales_dt, remain_amt, group_concat((select code_desc from code_dtl where code_val = sd.prd_type)) as description
+		select r.sales_seq, r.sales_dt, remain_payment_amt, remain_amt, group_concat((select code_desc from code_dtl where code_val = sd.prd_type)) as description
 		from remain_payment r
 		left outer join sales_dtl sd on r.sales_seq = sd.sales_seq
 		/* where remain_amt - remain_payment_amt > 0 */
@@ -145,6 +146,7 @@
 			d.sale_price as dtl_sale_price,
 			r.remain_seq,
 			r.sales_seq as remain_target_seq,
+			(select sales_dt from sales_mst mm where mm.sales_seq = r.sales_seq) as remain_target_dt,
 			r.remain_amt,
 			r.remain_sales_seq,
 			r.remain_sales_dt,

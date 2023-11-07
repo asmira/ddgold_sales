@@ -1,3 +1,4 @@
+
 <style>
 	#sales th  {
 		position: sticky;
@@ -55,6 +56,8 @@
     <tbody>
     </tbody>
 </table>
+<input type="hidden" name="mode"/>
+<input type="hidden" name="updRepairSeq"/>
 
 <#include "./repairForm.ftl">
 <#include "./repairReceiptForm.ftl">
@@ -64,9 +67,9 @@
   $(document).ready(function(){
     initPage();
     getList();
-    deleteRepair();
     
 	$("#repairTable").on("dblclick",".receiptTd", function(e) {
+		e.stopPropagation();
 		if(confirm('수리완료를 취소하시겠습니까?')) {
 			$.ajax({
 				url: "/api/cancelReceipt", 
@@ -81,13 +84,32 @@
 		}
 	});
 	
+	$("#repairTable").on("dblclick",".finishTd", function(e) {
+		e.stopPropagation();
+		if(confirm('출고처리를 취소하시겠습니까?\n 취소 후 자동추가된 재입고/영업일지/시재가 있으면 직접 삭제해야 합니다.')) {
+			$.ajax({
+				url: "/api/cancelFinish", 
+				data: JSON.stringify({repairDtlSeq: $(e.target).data('finishSeq')}),
+				contentType: "application/json;charset=UTF-8",
+				method: "POST",
+				dataType: "json",
+				success: function(res) {
+					getList();
+				}
+			});
+		}
+	});
+	
+    $("#repairTable").on("dblclick",".repairRow",function(e){
+    	e.stopPropagation();
+    	updateRow(e);
+    });
+    
 	$("#repairTable").on("click",".receiptBtn", function(e) {
-		console.log($(e.target).data('receiptSeq'));
 		$name('repairDtlSeq',$('#receiptModal')).val($(e.target).data('receiptSeq'));
 	});
 
 	$("#repairTable").on("click",".finishBtn", function(e) {
-		console.log($(e.target).data('receiptSeq'));
 		$name('repairDtlSeq',$('#finishModal')).val($(e.target).data('finishSeq'));
 		$name('repairSeq',$('#finishModal')).val($(e.target).data('repairSeq'));
 	});
@@ -106,47 +128,33 @@
 						
 	function initPage() {}
 
-  function getList() {
-  	const year = $("select[name=year]").val();
-	const month = $("select[name=month]").val();
-	
-	const paramDt = {};
-	if(!!year) {
-		paramDt.year = year;
-		if(!!month){
-			paramDt.month = month;
-		} 
+	function getList() {
+	  	const year = $("select[name=year]").val();
+		const month = $("select[name=month]").val();
+		
+		const paramDt = {};
+		if(!!year) {
+			paramDt.year = year;
+			if(!!month){
+				paramDt.month = month;
+			} 
+		}
+		
+	    $.get("/api/repairList",paramDt, function(res) {
+			const currentList = JSON.parse(res);
+			drawTable(currentList);
+	    });
 	}
-	
-    $.get("/api/repairList",paramDt, function(res) {
-		const currentList = JSON.parse(res);
-		drawTable(currentList);
-    });
-  }
   
-  function deleteRepair() {
-	$("#repairTable").on("dblclick",".repairRow",function(e){
-		openConfirm(
-			"A/S 대장삭제", 
-			"A/S내역을을 삭제 하시겠습니까?",
-			function() {
-				console.log({goldSeq:$(e.target).parent().data('seq')})
-				$.ajax({
-					url: "/api/deleteRepair/"+$(e.target).parent().data('seq'), 
-					contentType: "application/json;charset=UTF-8",
-					method: "POST",
-					dataType: "json",
-					success: function(res) {
-						getList();
-						alert('삭제되었습니다.');
-					}, fail: function(res) {
-						alert('삭제중 오류가 발생하였습니다.');
-					}
-				})
-			}
-		);
-	});
-}
+	function updateRow(e) {
+		$name('mode').val('update');
+		$name('updRepairSeq').val($(e.target).closest('tr').data('seq'));
+		console.log($(e.target).closest('tr'))
+		var modalEl = document.getElementById('repairModal');
+		var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+		modal.show();
+	}
+
 
   function drawTable(arr){
     const nf = Intl.NumberFormat()
@@ -170,9 +178,9 @@
 				html+="	<td class='text-center'><button type='button' class='receiptBtn' data-bs-toggle='modal' data-bs-target='#receiptModal' data-receipt-seq='"+dtl.repairDtlSeq+"'>수리완료</button></td>";
 			}
 			if(dtl.finishStatus === 'R') {
-				html+="	<td>재입고("+dtl.finishDate+")</td>";
+				html+="	<td class='finishTd' data-finish-seq="+dtl.repairDtlSeq+">재입고("+dtl.finishDate+")</td>";
 			} else if(dtl.finishStatus === 'F') {
-				html+="	<td>"+dtl.finishDate+"</td>";
+				html+="	<td class='finishTd' data-finish-seq="+dtl.repairDtlSeq+">"+ dtl.finishDate + (dtl.repairPrice > 0 ? "<br/>("+dtl.repairPrice+"원)" : "") + "</td>";
 			} else {
 				html+="	<td class='text-center'><button type='button' class='finishBtn' data-bs-toggle='modal' data-bs-target='#finishModal' data-repair-seq='"+dtl.repairSeq+"' data-finish-seq='"+dtl.repairDtlSeq+"'>출고처리</button></td>";
 			}

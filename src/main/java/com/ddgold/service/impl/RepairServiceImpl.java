@@ -111,6 +111,12 @@ public class RepairServiceImpl implements RepairService {
   
   @Override
   @Transactional
+  public int cancelFinish(RepairDtlVO po) {
+    return repairDao.cancelFinish(po);
+  }
+  
+  @Override
+  @Transactional
   public int finishRepair(RepairDtlVO po) {
     int res = repairDao.updateFinish(po);
     

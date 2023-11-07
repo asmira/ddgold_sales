@@ -80,6 +80,12 @@ public class SalesServiceImpl implements SalesService {
 			SalesVO uvo = new SalesVO();
 			uvo.setSalesSeq(po.getRemainTargetSeq());
 			uvo.setSalePrice(tvo.getTotalPayment() + totalPayment);
+			uvo.setPaymentCardDtl(tvo.getPaymentCardDtl());
+			uvo.setPaymentCashDtl(tvo.getPaymentCashDtl());
+			uvo.setPaymentGoldDtl(tvo.getPaymentGoldDtl());
+			uvo.setPaymentGoodsDtl(tvo.getPaymentGoodsDtl());
+			uvo.setPaymentTransferDtl(tvo.getPaymentTransferDtl());
+			
 			salesDao.updateSalesMst(uvo);
 
 		} else if(po.getSalePrice()-totalPayment > 0) {

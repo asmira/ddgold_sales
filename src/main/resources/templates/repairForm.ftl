@@ -2,7 +2,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content"> 
       <div class="modal-header">
-        <h5 class="modal-title" id="salesModalLabel">수리장 등록</h5>
+        <h5 class="modal-title" id="salesModalLabel">수리장 <span id="modeTtl">등록</span></h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -56,12 +56,14 @@
 						</select>
 						<label for="color1" style="margin-left:8px;">색상</label>
 					</div>
+					<input type="hidden" name="repairDtlSeq" value=""/>
 				</div>
 			</div>
 		</form>
 	  </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitRepairInsert();">Save changes</button>
+        <button type="button" class="btn btn-primary" id="deleteRepair" onclick="deleteRepair();">delete</button>
+        <button type="button" class="btn btn-primary" onclick="submitRepair();">Save changes</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -75,44 +77,111 @@
 			format: 'yyyy-mm-dd',
 			value: today
 		});
+		$("#prdAdd").click((e) => addRow(e));
 		
-		const rowHtml = $(".prdRow:first").clone().wrapAll("<div/>").parent().html();
-		$("#prdAdd").click(function(e){
-			$(".prdDtl").append(rowHtml);
-		});
+		$("#prdRemove").click((e) => removeRow(e));
 		
-		$("#prdRemove").click(function(e){
-			if($(".prdRow").length > 1) $(".prdRow:last").remove();
+		var repairModalEl = document.getElementById('repairModal');
+		
+		//reset form
+		repairModalEl.addEventListener('hidden.bs.modal', function (event) {
+		  $name("repairForm").get(0).reset();
+		  
+		  $(".prdRow:gt(0)").remove();
+		  $name('mode').val('');
+		  $name('updRepairSeq').val('');
+		  $name('repairDtlSeq',$name("repairForm")).val('');
+		  $("#deleteRepair").hide();
+		})
+		
+		// set default date on open		
+		repairModalEl.addEventListener('show.bs.modal', function (event) {
+		  const mode = $name('mode').val();
+		  if(mode === 'update') {
+			$("#deleteRepair").show();
+		  	$("#modeTtl").text("수정");
+			const updRepairSeq = $name('updRepairSeq').val();
+
+			$.get("/api/repair/"+updRepairSeq,{},function(res) {
+				const repair = JSON.parse(res);
+				fillUpdateForm(repair);
+			});
+		  } else {
+		  	$("#deleteRepair").hide();
+			$("#modeTtl").text("등록");
+			$('#repairDate').val(today);
+		  }
 		});
 	});
+	
+	function addRow() {
+		const rowHtml = $(".prdRow:first").clone().wrapAll("<div/>").parent().html();
+		$(".prdDtl").append(rowHtml);
+	}
 
+	function removeRow() {
+		if($(".prdRow").length > 1) $(".prdRow:last").remove();
+	}
+	
 	function makeParam() {
-		const $frm = $("form[name=repairForm]");
+		const $frm = $name("repairForm");
+		const mode = $name("mode").val();
+		
 		const mngParam = {
-			repairDate : $("[name=repairDate]",$frm).val(),
-			repairName : $("[name=repairName]",$frm).val(),
-			repairMobile : $("[name=repairMobile]",$frm).val(),
-			repairDesc : $("[name=repairDesc]",$frm).val(),
+			repairDate : $name("repairDate",$frm).val(),
+			repairName : $name("repairName",$frm).val(),
+			repairMobile : $name("repairMobile",$frm).val(),
+			repairDesc : $name("repairDesc",$frm).val(),
 		}
+		if(mode === 'update') mngParam.repairSeq = $name('updRepairSeq').val();
 		
 		const dtlParams = [];
 		$(".prdRow",$frm).each((idx,row)=>{
 			const dtlParam = {
-				karatage:$("[name=karatage]",row).val(),
-				prdType:$("[name=prdType]",row).val(),
-				color:$("[name=color]",row).val(),
+				karatage:$name("karatage",row).val(),
+				prdType:$name("prdType",row).val(),
+				color:$name("color",row).val(),
 			};
+			if(mode === 'update') dtlParam.repairDtlSeq = $name('repairDtlSeq',row).val();
 			dtlParams.push(dtlParam);
 		});
 		
 		mngParam.repairDtlList = dtlParams;
-		
 		return mngParam;
 	}
+	
+	function fillUpdateForm(repair) {
+		const $frm = $("form[name=repairForm]");
+		//기본 input/select 값 세팅
+		var keyArr = Object.keys(repair);
+		keyArr.forEach((v,i) => {
+			repair[v] && $name(v,$frm).val(repair[v]);
+		});
 
-	function submitRepairInsert() {
+		const repairSub = repair.repairDtlList[0];
+		const subKeyArr = Object.keys(repairSub);
+		subKeyArr.forEach((v,i) => {
+			repairSub[v] && $name(v,$(".prdRow:eq("+0+")")).val(repairSub[v]);
+		});
+						
+		//dtl만큼 추가 후 세팅
+		if(repair.repairDtlList?.length > 1) {
+			for(let i = 1 ; i < repair.repairDtlList.length; i++) {
+				addRow();
+				const repairSub = repair.repairDtlList[i];
+				const subKeyArr = Object.keys(repairSub);
+				subKeyArr.forEach((v,idx) => {
+					repairSub[v] && $name(v,$(".prdRow:eq("+i+")")).val(repairSub[v]);
+				});
+			}
+		}
+	}
+	
+	
+	function submitRepair() {
+		const mode = $name("mode").val();
 		$.ajax({
-			url: "/api/insertRepair", 
+			url: mode === 'update' ? "/api/updateRepair" : "/api/insertRepair", 
 			data: JSON.stringify(makeParam()),
 			contentType: "application/json;charset=UTF-8",
 			method: "POST",
@@ -120,7 +189,28 @@
 			success: function(res) {
 				getList();
 			}
-		})
+		});
 	}
-
+	
+	function deleteRepair(e) {
+		const updRepairSeq = $name('updRepairSeq').val();
+		openConfirm(
+			"A/S 대장삭제", 
+			"A/S내역을을 삭제 하시겠습니까?",
+			function() {
+				$.ajax({
+					url: "/api/deleteRepair/"+updRepairSeq, 
+					contentType: "application/json;charset=UTF-8",
+					method: "POST",
+					dataType: "json",
+					success: function(res) {
+						getList();
+						alert('삭제되었습니다.');
+					}, fail: function(res) {
+						alert('삭제중 오류가 발생하였습니다.');
+					}
+				})
+			}
+		);
+	}
 </script>

@@ -22,4 +22,6 @@ public interface RepairService {
     public int deleteRepair(int repairSeq);
 
     int restockRepair(RepairDtlVO po);
+
+    int cancelFinish(RepairDtlVO po);
 }

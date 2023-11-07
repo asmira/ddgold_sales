@@ -151,7 +151,6 @@
 	}
 	
 	function calculate(obj) {
-		console.log(obj.name);
 		const bp = $("[name=buyingPrice]",getCS(obj,".buyingPriceDiv")).val()*1;
 
 		const w =  (obj.name == "weight")? $(obj).val() : $("[name=weight]",getCS(obj,".weightDiv")).val()*1;
@@ -341,7 +340,8 @@
 	}
 
 	function makeRemainOptions(remainTargetSeq) {
-		$.get("/api/salesRemainList",{},function(res) {
+		const mode = $name('mode').val();
+		$.get("/api/salesRemainList",(mode ==='update')?{type:'full'}:{},function(res) {
 			const list = JSON.parse(res);
 			$("select[name=remainTargetSeq] option").remove();
 			
@@ -436,7 +436,7 @@
 			$('#salesDtFrm').val(today);
 			 makeRemainOptions();
 		  }
-		})
+		});
 
 		$("#cancelPrevPayment").click(function(e) {
 			const $row = $(e.target).closest(".row");

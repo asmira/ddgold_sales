@@ -26,6 +26,7 @@
 		    <result property="receiptDate" column="receipt_date"/>
 		    <result property="finishDate" column="finish_date"/>
 		    <result property="finishStatus" column="finish_status"/>
+		    <result property="repairPrice" column="repair_price"/>
 		    <result property="paymentCardDtl" column="payment_card_dtl"/>
 		    <result property="paymentTransferDtl" column="payment_transfer_dtl"/>
 		    <result property="paymentCashDtl" column="payment_cash_dtl"/>
@@ -173,7 +174,18 @@
             finish_status = 'F'
 		where repair_dtl_seq = #{repairDtlSeq}
     </update>
-
+	
+	<update id="cancelFinish" parameterType="com.ddgold.vo.RepairDtlVO">
+		update repair_dtl set
+			finish_date = null,
+			repair_price = null,
+			payment_card_dtl = null,
+            payment_transfer_dtl = null,
+            payment_cash_dtl = null,
+            finish_status = null
+		where repair_dtl_seq = #{repairDtlSeq}
+	</update>
+		
     <update id="updateRestock" parameterType="com.ddgold.vo.RepairDtlVO">
 		update repair_dtl set
             finish_status = 'R',
@@ -192,7 +204,7 @@
 	        repair_desc5 = #{repairDesc5},
 	        repair_date = #{repairDate}
 		where	    	
-	    	repair_seq = #{repair_seq}
+	    	repair_seq = #{repairSeq}
     </update>
 
 	<update id="updateRepairDtl" parameterType="com.ddgold.vo.RepairDtlVO">
@@ -201,7 +213,7 @@
             karatage = #{karatage},
             color = #{color}
         where
-        	repair_dtl_seq = #{repair_dtl_seq}
+        	repair_dtl_seq = #{repairDtlSeq}
 	</update>
 
     <delete id="deleteRepair" parameterType="integer">

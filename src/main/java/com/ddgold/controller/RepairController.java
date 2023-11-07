@@ -27,9 +27,7 @@ public class RepairController {
 	@ResponseBody
 	@GetMapping("/api/repairList")
 	public String repairListJson(SalesParamVO po) {
-		System.out.println(po);
 		List<RepairVO> list = repairService.getRepairList(po);
-		System.out.println(list);
 		Gson gson = new GsonBuilder()
 					.serializeNulls()
 					.setDateFormat("yyyy-MM-dd")
@@ -40,9 +38,7 @@ public class RepairController {
 	@ResponseBody
 	@GetMapping("/api/repair/{repairSeq}")
 	public String repairJson(@PathVariable int repairSeq) {
-		System.out.println(repairSeq);
 		RepairVO dtl = repairService.getRepair(repairSeq);
-		System.out.println(dtl);
 		Gson gson = new GsonBuilder()
 					.serializeNulls()
 					.setDateFormat("yyyy-MM-dd")
@@ -54,8 +50,6 @@ public class RepairController {
 	@ResponseBody
 	@PostMapping( consumes = "application/json", value = "/api/insertRepair")
 	public String insertRepair(@RequestBody RepairVO vo) {
-		System.out.println(vo);
-		
 		repairService.insertRepair(vo);
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -68,8 +62,6 @@ public class RepairController {
 	@ResponseBody
 	@PostMapping( value = "/api/updateRepair")
 	public String updateRepair(@RequestBody RepairVO vo) {
-		System.out.println(vo);
-		
 		repairService.updateRepair(vo);
 		
 		HashMap<String, String> result = new HashMap<>();
@@ -93,7 +85,7 @@ public class RepairController {
 	
 
     @ResponseBody
-    @PostMapping( value = {"/api/updateFinish", "/api/cancelFinish"})
+    @PostMapping( value = {"/api/updateFinish"})
     public String updateFinish(@RequestBody RepairDtlVO vo) {
         if("R".equals(vo.getFinishStatus())) {
           repairService.restockRepair(vo);
@@ -107,13 +99,23 @@ public class RepairController {
         Gson gson = new Gson();
         return gson.toJson(result);
     }
+
+    @ResponseBody
+    @PostMapping( value = {"/api/cancelFinish"})
+    public String cancelFinish(@RequestBody RepairDtlVO vo) {
+      repairService.cancelFinish(vo);
+      
+      HashMap<String, String> result = new HashMap<>();
+      result.put("result", "success");
+      
+      Gson gson = new Gson();
+      return gson.toJson(result);
+    }
     
 	
 	@ResponseBody
 	@PostMapping( value = "/api/deleteRepair/{repairSeq}")
 	public String deleteCashOnHAnd(@PathVariable int repairSeq) {
-		System.out.println(repairSeq);
-		
 		repairService.deleteRepair(repairSeq);
 		
 		HashMap<String, String> result = new HashMap<>();
