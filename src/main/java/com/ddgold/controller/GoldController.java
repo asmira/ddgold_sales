@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ddgold.service.GoldService;
@@ -17,13 +18,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 @Controller
+@RequestMapping("/api/gold")
 public class GoldController {
 
 	@Autowired
 	GoldService goldService;
 	
 	@ResponseBody
-	@GetMapping("/api/goldList")
+	@GetMapping("/list")
 	public String goldListJson(SalesParamVO po) {
 		System.out.println(po);
 		List<GoldVO> list = goldService.getGoldMngList(po);
@@ -36,7 +38,7 @@ public class GoldController {
 	}
 	
 	@ResponseBody
-	@PostMapping( consumes = "application/json", value = "/api/insertGoldMng")
+	@PostMapping( consumes = "application/json", value = "/insert")
 	public String insertGoldMng(@RequestBody GoldVO vo) {
 		System.out.println(vo);
 		
@@ -50,7 +52,7 @@ public class GoldController {
 	}
 
 	@ResponseBody
-	@PostMapping( value = "/api/updateGoldMng")
+	@PostMapping( value = "/update")
 	public String updateGoldMng(@RequestBody GoldVO vo) {
 		System.out.println(vo);
 		
@@ -64,7 +66,7 @@ public class GoldController {
 	}
 
 	@ResponseBody
-	@PostMapping( value = "/api/deleteGoldMng")
+	@PostMapping( value = "/delete")
 	public String deleteCashOnHAnd(@RequestBody GoldVO vo) {
 		System.out.println(vo);
 		

@@ -144,6 +144,7 @@ public class RepairServiceImpl implements RepairService {
       sales.setPaymentCashDtl(po.getPaymentCashDtl());
       sales.setPaymentTransferDtl(po.getPaymentTransferDtl());
       sales.setPaymentCardDtl(po.getPaymentCardDtl());
+      sales.setPaymentGoldDtl(po.getPaymentGoldDtl());
       sales.setSalePrice(po.getRepairPrice());
       sales.setSalesDt(po.getFinishDate());
       sales.setDescription(vo.getRepairName() + "님 " + curDtl.getPrdTypeStr() + " 수리비");

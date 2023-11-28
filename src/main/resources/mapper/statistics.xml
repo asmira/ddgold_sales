@@ -22,7 +22,7 @@
 				else 0 end 
 			) gold,
 			sum(
-				case when karatage = 4 then 
+				case when karatage in (4,5,6) then 
 				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
 				else 0 end 
 			) silver,
@@ -87,7 +87,7 @@
 			else 0 end 
 		) gold,
 		sum(
-			case when karatage = 4 then 
+			case when karatage in (4,5,6) then 
 			case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
 			else 0 end 
 		) silver,
@@ -134,7 +134,7 @@
 				else 0 end 
 			) gold,
 			sum(
-				case when karatage = 4 then 
+				case when karatage in (4,5,6) then 
 				case when a.sales_dtl > 0 then a.dtl_sale_price else a.sale_price end
 				else 0 end 
 			) silver,

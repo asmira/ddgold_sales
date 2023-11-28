@@ -33,7 +33,7 @@
 						<th scope="col">14k</th>
 						<th scope="col">18k</th>
 						<th scope="col">순금</th>
-						<th scope="col">은</th>
+						<th scope="col">기타</th>
 						<th scope="col">총계</th>
 					</tr>
 				</thead>
@@ -67,7 +67,7 @@
 						<th class="col">14k</th>
 						<th class="col">18k</th>
 						<th class="col">순금</th>
-						<th class="col">은</th>
+						<th class="col">기타</th>
 						<th class="col">총계</th>
 					</tr>
 				</thead>
@@ -102,7 +102,7 @@
 						<th>14k</th>
 						<th>18k</th>
 						<th>순금</th>
-						<th>은</th>
+						<th>기타</th>
 						<th>합계</th>
 					</tr>
 				</thead>
@@ -208,14 +208,14 @@
 	
 	function getCashOnHand(dt,callback) {
 		const param={dt};
-		$.get("/api/cashList", param, function(res){
+		$.get("/api/cash/list", param, function(res){
 			if(callback) callback(res);
 		});
 	}
 
 	function getGoldList(dt,callback) {
 		const param={dt};
-		$.get("/api/goldList", param, function(res){
+		$.get("/api/gold/list", param, function(res){
 			if(callback) callback(res);
 		});
 	}

@@ -30,6 +30,7 @@
 		    <result property="paymentCardDtl" column="payment_card_dtl"/>
 		    <result property="paymentTransferDtl" column="payment_transfer_dtl"/>
 		    <result property="paymentCashDtl" column="payment_cash_dtl"/>
+		    <result property="paymentGoldDtl" column="payment_gold_dtl"/>
 	    </collection>
 	</resultMap>
 
@@ -50,6 +51,7 @@
             d.payment_card_dtl,
             d.payment_transfer_dtl,
             d.payment_cash_dtl,
+            d.payment_gold_dtl,
             d.prd_type,
             (select code_desc from code_dtl where code_grp='prd_type' and code_val=d.prd_type) prd_type_str,
             d.karatage,
@@ -104,6 +106,7 @@
             d.payment_card_dtl,
             d.payment_transfer_dtl,
             d.payment_cash_dtl,
+            d.payment_gold_dtl,
             d.prd_type,
             (select code_desc from code_dtl where code_grp='prd_type' and code_val=d.prd_type) prd_type_str,
             d.karatage,
@@ -171,6 +174,7 @@
 			payment_card_dtl = #{paymentCardDtl},
             payment_transfer_dtl = #{paymentTransferDtl},
             payment_cash_dtl = #{paymentCashDtl},
+            payment_gold_dtl = #{paymentGoldDtl},
             finish_status = 'F'
 		where repair_dtl_seq = #{repairDtlSeq}
     </update>
@@ -182,6 +186,7 @@
 			payment_card_dtl = null,
             payment_transfer_dtl = null,
             payment_cash_dtl = null,
+            payment_gold_dtl = null,
             finish_status = null
 		where repair_dtl_seq = #{repairDtlSeq}
 	</update>

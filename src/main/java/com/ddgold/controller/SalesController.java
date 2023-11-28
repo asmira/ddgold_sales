@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import com.ddgold.service.OrderService;
 import com.ddgold.service.SalesService;
+import com.ddgold.vo.OrderVO;
 import com.ddgold.vo.RemainVO;
 import com.ddgold.vo.SalesParamVO;
 import com.ddgold.vo.SalesVO;
@@ -24,6 +25,9 @@ public class SalesController {
 
 	@Autowired
 	SalesService salesService;
+	
+	@Autowired
+	OrderService orderService;
 
 	@ResponseBody
 	@GetMapping("/api/salesList")
@@ -70,7 +74,7 @@ public class SalesController {
 	
 	@ResponseBody
 	@PostMapping("/api/insertSales")
-	public String insertSales(@RequestBody SalesVO po) {
+	public String insertSales(@RequestBody SalesVO po, @RequestBody OrderVO oo) {
 		System.out.println(po);
 		salesService.insertSales(po);
 		

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ddgold.service.CashService;
@@ -17,13 +18,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 @Controller
+@RequestMapping("/api/cash")
 public class CashController {
 
 	@Autowired
 	CashService cashService;
 
 	@ResponseBody
-	@GetMapping("/api/cashList")
+	//@GetMapping("/api/cashList")
+	@GetMapping("/list")
 	public String cashListJson(SalesParamVO po) {
 		List<CashOnHandVO> list = cashService.getCashOnHandList(po);
 
@@ -36,7 +39,7 @@ public class CashController {
 	}
 	
 	@ResponseBody
-	@PostMapping( consumes = "application/json", value = "/api/insertCashOnHand")
+	@PostMapping( consumes = "application/json", value = "/insert")
 	public String insertCashOnHAnd(@RequestBody CashOnHandVO vo) {
 		cashService.insertCashOnHand(vo);
 		
@@ -48,7 +51,7 @@ public class CashController {
 	}
 
 	@ResponseBody
-	@PostMapping( value = "/api/deleteCashOnHand")
+	@PostMapping( value = "/delete")
 	public String deleteCashOnHAnd(@RequestBody CashOnHandVO vo) {
 		cashService.deleteCashOnHand(vo);
 		
@@ -61,7 +64,7 @@ public class CashController {
 	
 	
 	@ResponseBody
-	@PostMapping("/api/closeCashOnHand")
+	@PostMapping("/close")
 	public String closeCashOnHAnd(SalesParamVO po) {
 		cashService.insertLastCashOnHand();
 		
@@ -78,7 +81,7 @@ public class CashController {
 	}
 	
 	@ResponseBody
-	@PostMapping("/api/cancleCloseCashOnHand")
+	@PostMapping("/cancleClose")
 	public String cancelCloseCashOnHAnd(SalesParamVO po) {
 		int deleted = cashService.deleteLastCashOnHand();
 		

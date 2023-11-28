@@ -59,7 +59,7 @@
 			return;
 		} 
 		$.ajax({
-			url: "/api/insertCashOnHand", 
+			url: "/api/cash/insert", 
 			data: JSON.stringify($("[name=cashForm]").serializeObject()),
 			contentType: "application/json;charset=UTF-8",
 			method: "POST",

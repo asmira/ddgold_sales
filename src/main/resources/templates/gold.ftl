@@ -91,7 +91,7 @@
 				function() {
 					console.log({goldSeq:$(e.target).parent().data('seq')})
 					$.ajax({
-						url: "/api/deleteGoldMng", 
+						url: "/api/gold/delete", 
 						data: JSON.stringify({goldSeq:$(e.target).parent().data('seq')}),
 						contentType: "application/json;charset=UTF-8",
 						method: "POST",
@@ -120,7 +120,7 @@
 			} 
 		}
 
-		$.get("/api/goldList", paramDt, function(res) {
+		$.get("/api/gold/list", paramDt, function(res) {
 			currentList = JSON.parse(res);
 			makeDt(currentList);
 			drawList(currentList);

@@ -68,7 +68,7 @@
 				"시재를 삭제 하시겠습니까?",
 				function() {
 					$.ajax({
-						url: "/api/deleteCashOnHand", 
+						url: "/api/cash/delete", 
 						data: JSON.stringify({cashSeq:$(e.target).parent().data('seq')}),
 						contentType: "application/json;charset=UTF-8",
 						method: "POST",
@@ -89,7 +89,7 @@
 				"시재마감", 
 				$("#cash .dt:last").text() + "일 시재를 마감처리 하시겠습니까?",
 				function() {
-					$.post("/api/closeCashOnHand", function(res) {
+					$.post("/api/cash/close", function(res) {
 						getList();
 					})
 				}
@@ -101,7 +101,7 @@
 				"시재마감", 
 				$("#cash .dt:last").text() + "일 시재를 마감취소처리 하시겠습니까? 해당일 등록된 시재가 없어야 합니다.",
 				function() {
-					$.post("/api/cancleCloseCashOnHand", function(res) {
+					$.post("/api/cash/cancleClose", function(res) {
 						console.log(res)
 						getList();
 					})
@@ -136,7 +136,7 @@
 			} 
 		}
 
-		$.get("/api/cashList", paramDt, function(res) {
+		$.get("/api/cash/list", paramDt, function(res) {
 			currentList = JSON.parse(res);
 			var nf = Intl.NumberFormat()
 			let prevDt="";

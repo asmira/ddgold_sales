@@ -53,6 +53,16 @@
 				<label for="description">비고</label>
 				<input id="description" name="description" type="text" autocomplete="one-time-code" class="form-control"/>
 			</div>
+			<div class="row orderForm mb-3">
+				<div class="form-group col-4">
+					<label for="description">고객명</label>
+					<input id="description" name="name" type="text" autocomplete="one-time-code" class="form-control"/>
+				</div>
+				<div class="form-group col-8">
+					<label for="description">고객연락처</label>
+					<input id="description" name="mobile" type="text" autocomplete="one-time-code" class="form-control"/>
+				</div>
+			</div>
 			<div class="form-group prdDtl mb-3">
 				<div>
 					<label for="salesTypeSel">제품등록</label>
@@ -83,6 +93,14 @@
 					    	</#list>
 					    </select>
 					    <label for="prdTypeStr1" style="margin-left:8px;">제품종류</label>
+			    	</div>
+			    	<div class="col-2 form-floating orderForm">
+					    <select class="form-select" name="color" id="colorStr1">
+					    	<#list colors as color>
+					    		<option value="${color.codeVal}">${color.codeDesc}</option>
+					    	</#list>
+					    </select>
+					    <label for="colorStr1" style="margin-left:8px;">색상</label>
 			    	</div>
 					<div class="col goldPrd" style="display:none;">
 						<div class="row gx-0">
@@ -406,6 +424,8 @@
 		//reset form
 		var salesModalEl = document.getElementById('salesModal')
 		
+		$(".orderForm", $(salesModalEl)).hide();
+		
 		salesModalEl.addEventListener('hidden.bs.modal', function (event) {
 		  $("[name=salesForm]").get(0).reset();
 		  $(".prdRow:gt(0)").remove();
@@ -486,6 +506,18 @@
 		
 		$(".prdDtl").on("change","[name=salesType]",function(e) {
 			const $trg = $(e.target);
+			
+			let hasOrder = false;
+			$name("salesType",$(".prdDtl")).each((idx,st) => {
+				hasOrder |= ($(st).val() == 2)
+			});
+			
+			if(hasOrder) {
+				$('.orderForm').show();
+			} else {
+				$('.orderForm').hide();
+			}
+												
 			if($trg.val() == 6) {
 				$(".prdRow:gt(0)").remove();
 				$(".prdRow:first [name=karatage]").parent().hide();

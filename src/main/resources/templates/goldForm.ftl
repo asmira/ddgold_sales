@@ -83,7 +83,7 @@
 
 	function submitGoldInsert() {
 		$.ajax({
-			url: "/api/insertGoldMng", 
+			url: "/api/gold/insert", 
 			data: JSON.stringify($("[name=goldForm]").serializeObject()),
 			contentType: "application/json;charset=UTF-8",
 			method: "POST",

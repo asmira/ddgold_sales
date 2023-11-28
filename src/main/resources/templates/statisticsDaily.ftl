@@ -63,7 +63,7 @@
         	<th style="width:14.3%">일자</th>
         	<th style="width:14.3%">14k</th>
         	<th style="width:14.3%">18k</th>
-        	<th style="width:14.3%">은</th>
+        	<th style="width:14.3%">기타</th>
         	<th style="width:14.3%">순금</th>
         	<th style="width:14.3%">총계(순금제외)</th>
         	<th style="width:14.3%">총계</th>
@@ -72,7 +72,7 @@
         	<th style="width:12.5%">구분</th>
         	<th style="width:12.5%">14k</th>
         	<th style="width:12.5%">18k</th>
-        	<th style="width:12.5%">은</th>
+        	<th style="width:12.5%">기타</th>
         	<th style="width:12.5%">순금</th>
         	<th style="width:12.5%">소계(순금제외)</th>
         	<th style="width:12.5%">소계</th>

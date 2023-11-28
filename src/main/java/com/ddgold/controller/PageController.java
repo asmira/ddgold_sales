@@ -3,7 +3,7 @@ package com.ddgold.controller;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,6 +58,7 @@ public class PageController {
 		mv.addObject("salesTypes", filterSpecificCode(cvoAll, "sales_type"));
 		mv.addObject("karatages", filterSpecificCode(cvoAll, "karatage"));
 		mv.addObject("prdTypes", filterSpecificCode(cvoAll, "prd_type"));
+		mv.addObject("colors", filterSpecificCode(cvoAll, "color"));
 		
 		mv.addObject("title","영업일지 관리");
 		mv.addObject("salesParam",param);
@@ -180,6 +181,6 @@ public class PageController {
 	public List<CodeVO> filterSpecificCode(List<CodeVO> cvoAll, String codeGrp) {
 		return cvoAll.stream().filter((cvo) -> {
 			return codeGrp.equals(cvo.getCodeGrp());
-		}).collect(Collectors.toList());
+		}).toList();
 	}
 }
